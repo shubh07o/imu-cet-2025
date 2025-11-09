@@ -113,9 +113,27 @@
         <div class="bg-white rounded-lg shadow-xl p-8 max-w-lg w-full text-center">
             <h2 class="text-3xl font-bold text-indigo-700 mb-4">Test Completed!</h2>
             <p class="text-gray-700 text-lg mb-2">You have finished the mock test.</p>
-            <p class="text-gray-700 text-2xl mb-6">
-                Your Score: <span id="score-count" class="font-bold text-indigo-700">0</span> / 190
+            
+            <p class="text-gray-700 text-2xl mb-2">
+                Your Score: <span id="score-count" class="font-bold text-indigo-700">0.00</span> / 190
             </p>
+            <p class="text-gray-600 text-sm mb-4">(Marking: Correct +1, Incorrect -0.25, Skipped 0)</p>
+
+            <div class="grid grid-cols-3 gap-2 text-center mb-6 px-4">
+                <div>
+                    <p class="text-2xl font-bold text-green-600" id="correct-count">0</p>
+                    <p class="text-sm text-gray-600">Correct</p>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-red-600" id="incorrect-count">0</p>
+                    <p class="text-sm text-gray-600">Incorrect</p>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-gray-500" id="skipped-count">0</p>
+                    <p class="text-sm text-gray-600">Skipped</p>
+                </div>
+            </div>
+
             <p class="text-gray-600 mb-6">Review your answers below. Correct answers are marked in green, incorrect in red.</p>
             <button onclick="closeModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg">
                 Close
@@ -383,7 +401,7 @@
                     clearInterval(timerInterval);
                     timerDisplay.textContent = "00:00:00";
                     timerDisplay.classList.add('text-red-600');
-                    submitTest(); // Auto-submit when time is up
+                    performSubmit(); // Auto-submit when time is up
                 }
             }, 1000);
         }
@@ -478,6 +496,10 @@
 
             // Count attempted questions & Score
             let score = 0;
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let skippedCount = 0;
+            
             allQuestions.forEach(q => {
                 const selectedCard = document.getElementById(`q-card-${q.id}`);
                 const selectedOption = document.querySelector(`input[name="question-${q.id}"]:checked`);
@@ -485,9 +507,12 @@
                 if (selectedOption) {
                     const userAnswer = parseInt(selectedOption.value);
                     if (userAnswer === q.correctAnswer) {
-                        score++;
+                        score += 1;
+                        correctCount++;
                         selectedCard.classList.add('correct-q');
                     } else {
+                        score -= 0.25;
+                        incorrectCount++;
                         selectedCard.classList.add('incorrect-q');
                         // Highlight the correct answer
                         const correctLabel = document.getElementById(`q-${q.id}-opt-${q.correctAnswer}`);
@@ -497,7 +522,8 @@
                     }
                 } else {
                     // User skipped this question
-                    selectedCard.classList.add('incorrect-q'); // Mark skipped as incorrect
+                    skippedCount++;
+                    selectedCard.classList.add('incorrect-q'); // Mark skipped as incorrect to show the answer
                     // Highlight the correct answer
                     const correctLabel = document.getElementById(`q-${q.id}-opt-${q.correctAnswer}`);
                     if(correctLabel) {
@@ -507,7 +533,11 @@
             });
 
             // Show results modal
-            scoreCountEl.textContent = score;
+            scoreCountEl.textContent = score.toFixed(2);
+            document.getElementById('correct-count').textContent = correctCount;
+            document.getElementById('incorrect-count').textContent = incorrectCount;
+            document.getElementById('skipped-count').textContent = skippedCount;
+
             modal.classList.remove('hidden');
 
             // Scroll to top to see modal
