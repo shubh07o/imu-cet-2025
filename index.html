@@ -3,559 +3,2600 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IMU-CET Mock Test</title>
+    <title>IMU CET 2025 Mock Test</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f4f7f6;
+        /* Custom scrollbar for cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
         }
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        
-        /* Style for sticky header */
-        .sticky-header {
-            position: sticky;
-            top: 0;
-            z-index: 50;
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
         }
-
-        /* Custom radio button */
-        input[type="radio"] {
-            -webkit-appearance: none;
-            appearance: none;
-            background-color: #fff;
-            margin: 0;
-            font: inherit;
-            color: currentColor;
-            width: 1.15em;
-            height: 1.15em;
-            border: 0.15em solid currentColor;
-            border-radius: 50%;
-            transform: translateY(-0.075em);
-            display: grid;
-            place-content: center;
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1; 
+            border-radius: 4px;
         }
-
-        input[type="radio"]::before {
-            content: "";
-            width: 0.65em;
-            height: 0.65em;
-            border-radius: 50%;
-            transform: scale(0);
-            transition: 120ms transform ease-in-out;
-            box-shadow: inset 1em 1em #4f46e5; /* indigo-600 */
-        }
-
-        input[type="radio"]:checked::before {
-            transform: scale(1);
-        }
-
-        /* Styles for feedback */
-        .correct-q {
-            background-color: #f0fdf4; /* green-50 */
-            border: 2px solid #22c55e; /* green-500 */
-        }
-        .incorrect-q {
-            background-color: #fef2f2; /* red-50 */
-            border: 2px solid #ef4444; /* red-500 */
-        }
-        .correct-answer-label {
-            font-weight: 600;
-            color: #16a34a; /* green-600 */
-        }
-        .correct-answer-label::after {
-            content: ' (Correct Answer)';
-            font-style: italic;
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8; 
         }
     </style>
 </head>
 <body class="bg-gray-100">
+    <div id="root"></div>
 
-    <!-- Sticky Header -->
-    <header class="sticky-header bg-white shadow-md w-full p-4">
-        <div class="container mx-auto flex flex-col sm:flex-row justify-between items-center">
-            <h1 class="text-2xl font-bold text-indigo-700">IMU-CET Mock Test</h1>
-            <div class="flex items-center space-x-4 mt-2 sm:mt-0">
-                <span class="text-lg font-semibold text-gray-700">Time Left:</span>
-                <span id="timer" class="text-2xl font-bold text-red-600 bg-gray-200 px-3 py-1 rounded-lg">03:00:00</span>
-            </div>
-        </div>
-        <!-- Subject Filters -->
-        <nav class="container mx-auto mt-4">
-            <div class="flex flex-wrap justify-center gap-2">
-                <button onclick="filterQuestions('all')" class="filter-btn bg-indigo-600 text-white px-4 py-2 rounded-full text-sm font-medium">All (190)</button>
-                <button onclick="filterQuestions('Maths')" class="filter-btn bg-white text-gray-700 px-4 py-2 rounded-full text-sm font-medium border border-gray-300 hover:bg-gray-50">Maths (50)</button>
-                <button onclick="filterQuestions('Physics')" class="filter-btn bg-white text-gray-700 px-4 py-2 rounded-full text-sm font-medium border border-gray-300 hover:bg-gray-50">Physics (40)</button>
-                <button onclick="filterQuestions('Chemistry')" class="filter-btn bg-white text-gray-700 px-4 py-2 rounded-full text-sm font-medium border border-gray-300 hover:bg-gray-50">Chemistry (20)</button>
-                <button onclick="filterQuestions('English')" class="filter-btn bg-white text-gray-700 px-4 py-2 rounded-full text-sm font-medium border border-gray-300 hover:bg-gray-50">English (40)</button>
-                <button onclick="filterQuestions('GS')" class="filter-btn bg-white text-gray-700 px-4 py-2 rounded-full text-sm font-medium border border-gray-300 hover:bg-gray-50">GS (20)</button>
-                <button onclick="filterQuestions('Aptitude')" class="filter-btn bg-white text-gray-700 px-4 py-2 rounded-full text-sm font-medium border border-gray-300 hover:bg-gray-50">Aptitude (20)</button>
-            </div>
-        </nav>
-    </header>
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
 
-    <!-- Main Content -->
-    <main class="container mx-auto p-4">
-        <div id="questions-container" class="space-y-4">
-            <!-- Questions will be injected here by JavaScript -->
-        </div>
-        
-        <!-- Submit Button -->
-        <div class="mt-8 text-center">
-            <button id="submit-btn" onclick="submitTest()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-12 rounded-lg text-lg shadow-lg transition duration-300">
-                Submit Test
-            </button>
-        </div>
-    </main>
+        // --- Inline Icons (Lucide replacement for standalone HTML) ---
+        const Clock = ({ size = 24, className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        );
+        const Menu = ({ size = 24, className, onClick }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} onClick={onClick} style={{cursor: 'pointer'}}><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+        );
+        const X = ({ size = 24, className, onClick }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} onClick={onClick} style={{cursor: 'pointer'}}><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        );
+        const ChevronLeft = ({ size = 24, className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m15 18-6-6 6-6"/></svg>
+        );
+        const ChevronRight = ({ size = 24, className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m9 18 6-6-6-6"/></svg>
+        );
+        const Bookmark = ({ size = 24, className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+        );
+        const CheckCircle = ({ size = 24, className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m22 4-10 10.01-7-7"/></svg>
+        );
+        const AlertCircle = ({ size = 24, className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+        );
+        const RotateCcw = ({ size = 24, className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        );
 
-    <!-- Results Modal -->
-    <div id="results-modal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-lg shadow-xl p-8 max-w-lg w-full text-center">
-            <h2 class="text-3xl font-bold text-indigo-700 mb-4">Test Completed!</h2>
-            <p class="text-gray-700 text-lg mb-2">You have finished the mock test.</p>
-            
-            <p class="text-gray-700 text-2xl mb-2">
-                Your Score: <span id="score-count" class="font-bold text-indigo-700">0.00</span> / 190
-            </p>
-            <p class="text-gray-600 text-sm mb-4">(Marking: Correct +1, Incorrect -0.25, Skipped 0)</p>
-
-            <div class="grid grid-cols-3 gap-2 text-center mb-6 px-4">
-                <div>
-                    <p class="text-2xl font-bold text-green-600" id="correct-count">0</p>
-                    <p class="text-sm text-gray-600">Correct</p>
-                </div>
-                <div>
-                    <p class="text-2xl font-bold text-red-600" id="incorrect-count">0</p>
-                    <p class="text-sm text-gray-600">Incorrect</p>
-                </div>
-                <div>
-                    <p class="text-2xl font-bold text-gray-500" id="skipped-count">0</p>
-                    <p class="text-sm text-gray-600">Skipped</p>
-                </div>
-            </div>
-
-            <p class="text-gray-600 mb-6">Review your answers below. Correct answers are marked in green, incorrect in red.</p>
-            <button onclick="closeModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg">
-                Close
-            </button>
-        </div>
-    </div>
-
-    <!-- Confirmation Modal -->
-    <div id="confirm-modal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-lg shadow-xl p-8 max-w-md w-full text-center">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Submit Test?</h2>
-            <p class="text-gray-700 text-lg mb-6">Are you sure you want to submit? You will not be able to change your answers.</p>
-            <div class="flex justify-center gap-4">
-                <button onclick="closeConfirmModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded-lg">
-                    Cancel
-                </button>
-                <button onclick="performSubmit()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">
-                    Yes, Submit
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // --- DATABASE OF ALL 190 QUESTIONS ---
-        const allQuestions = [
-            // --- MATHS (1-50) ---
-            // Note: Some PDF questions are ambiguous or have typos. An answer has been selected based on the most likely intent.
-            { id: 1, subject: 'Maths', text: 'F(x)=x|x| at x=0 is continuous and differentiable. Which of the following is true?', options: ['f(x) is continuous at x=0', 'f(x) is discontinuous at x=0', 'f(x) is differentiable at x=0', 'f(x) is not differentiable at x=0'], correctAnswer: 0 },
-            { id: 2, subject: 'Maths', text: "A & B are 2 events, P(A)=0.6, P(B)=0.2 & P(A/B) = 0.5 then P(A'/B') is =", options: ['6/7', '3/4', '5/8', '1/4'], correctAnswer: 2 }, // Assumes P(B/A)=0.5 was intended, as P(A/B)=0.5 leads to 3/8.
-            { id: 3, subject: 'Maths', text: 'AB & BA both exist then,', options: ['AB = -BA', 'A & B are non singular', 'A & B are singular', 'AB ≠ BA'], correctAnswer: 3 },
-            { id: 4, subject: 'Maths', text: 'A = [matrix: [3,0,0], [0,3,0], [0,0,3]]. A^4 is =', options: ['12A', '81A', '27A', '4A'], correctAnswer: 2 },
-            { id: 5, subject: 'Maths', text: 'Order & degree of differential equation of family of curves Y = Ax + A^3 given by A is arbitrary constant are', options: ['2, 3', '1, 2', '1, 3', '2, 1'], correctAnswer: 2 },
-            { id: 6, subject: 'Maths', text: 'Function F(x) = tan x - x', options: ['always increases', 'always decreases', 'Remain constant', 'None of these'], correctAnswer: 0 },
-            { id: 7, subject: 'Maths', text: '∫[0 to 1.5] [x^2] dx =', options: ['2√2', '√2 - 1', '2 - √2', '2(1.5 - √2)'], correctAnswer: 2 }, // ∫[0,1) 0 dx + ∫[1,√2) 1 dx + ∫[√2,1.5] 2 dx = [x][1,√2] + [2x][√2,1.5] = (√2-1) + (3-2√2) = 2-√2
-            { id: 8, subject: 'Maths', text: 'Line (x-1)/-3 = (y-2)/2k = (z-3)/2 & (x-1)/3k = (y-5)/1 = (6-z)/5 are mutually ⊥, K =', options: ['10/7', '7', '-10', '-10/7'], correctAnswer: 3 }, // a1a2+b1b2+c1c2=0. (-3)(3k) + (2k)(1) + (2)(-5) = 0. -9k + 2k - 10 = 0. -7k = 10. k = -10/7
-            { id: 9, subject: 'Maths', text: 'Radius of cylindrical is ↑ at the rate of 3 cm/sec & height ↓ at rate of 4 cm/sec. Rate of change of its volume when radius is 4 cm & height is 6 cm', options: ['80 π cm²/sec', '144 π cm²/sec', '64 π cm²/sec', '80 π cm³/sec'], correctAnswer: 3 }, // V=πr²h. dV/dt = 2πrh(dr/dt) + πr²(dh/dt) = 2π(4)(6)(3) + π(4²)(-4) = 144π - 64π = 80π.
-            { id: 10, subject: 'Maths', text: 'Number of arrangement of 10 diff things taken 4 at a time in which one particular thing always occur is', options: ['2016', '2014', '2015', 'None of these'], correctAnswer: 0 }, // 1 thing is fixed. We need to arrange 3 from remaining 9 (9P3) and the 1 fixed thing can be in 4 pos. 4 * 9P3 = 4 * (9*8*7) = 4 * 504 = 2016
-            { id: 11, subject: 'Maths', text: 'Inverse of skew-symmetric matrix of odd order', options: ['does not exist', 'skew symmetric', 'diagonal matrix', 'symmetric matrix'], correctAnswer: 0 },
-            { id: 12, subject: 'Maths', text: 'Differentiate log [log (log x²)] w.r.to x is', options: ['2 / (x log(log x²))', '2 / (x log(x²) log(log x²))', '2x / (log(x²) log(log x²))', '2 / (log x²)'], correctAnswer: 1 },
-            { id: 13, subject: 'Maths', text: 'Normal at point (1, 1) on curve 2y + x² = 3', options: ['x - y = 1', 'x - y = 0', 'x + y = 0', 'x + y + 1 = 0'], correctAnswer: 1 }, // 2dy/dx + 2x = 0 -> dy/dx = -x. At (1,1), m = -1. Normal slope = -1/m = 1. Eq: y-1 = 1(x-1) -> y = x.
-            { id: 14, subject: 'Maths', text: '4 digit no. greater than 5,000 can be found out of 3, 4, 5, 6 & 7 (repeated). The no of such is', options: ['70', '27', '72', '375'], correctAnswer: 3 }, // PDF options are wrong. Correct is 3 (5,6,7) * 5 * 5 * 5 = 375. I've added the correct answer.
-            { id: 15, subject: 'Maths', text: 'Distance of point (a, b, c) from y - axis is', options: ['b', '√(a² + c²)', '|c| + |b|', '|b|'], correctAnswer: 1 },
-            { id: 16, subject: 'Maths', text: 'Lines makes angle π/3 & π/4 with x & y axis resp., then acute angle made by z-axis is', options: ['π/3', 'π/6', 'π/4', '5π/12'], correctAnswer: 0 }, // cos²α + cos²β + cos²γ = 1. cos²(π/3) + cos²(π/4) + cos²γ = 1. (1/2)² + (1/√2)² + cos²γ = 1. 1/4 + 1/2 + cos²γ = 1. cos²γ = 1 - 3/4 = 1/4. cosγ = ±1/2. Acute angle γ = π/3.
-            { id: 17, subject: 'Maths', text: 'tan⁻¹(3) + tan⁻¹(α) = tan⁻¹((3+α)/(1-3α)) is valid for value of', options: ['α ∈ (-1/3, 1/3)', 'α < 1/3', 'all real values', 'α > 1/3'], correctAnswer: 1 }, // Formula tan⁻¹x + tan⁻¹y is valid when xy < 1. Here 3α < 1, so α < 1/3.
-            { id: 18, subject: 'Maths', text: 'Absolute max. value of F(x) = 4x - (1/2)x² in interval [-2, 9/2] is', options: ['6', '10', '9', '8'], correctAnswer: 3 }, // f'(x) = 4 - x. f'(x)=0 at x=4. f(4) = 16 - 8 = 8. f(-2) = -8 - 2 = -10. f(9/2) = 4(4.5) - 0.5(4.5)² = 18 - 0.5(20.25) = 18 - 10.125 = 7.875. Max is 8.
-            { id: 19, subject: 'Maths', text: 'Problem in mathematics is given to 3 student A, B, C & their chances of solving problem are 1/2, 1/3, 1/4. Probability of solving problem', options: ['3/4', '1/2', '1/4', '1/3'], correctAnswer: 0 }, // P(solve) = 1 - P(none solve) = 1 - P(A')P(B')P(C') = 1 - (1/2)(2/3)(3/4) = 1 - (6/24) = 1 - 1/4 = 3/4.
-            { id: 20, subject: 'Maths', text: '∫ (1 - sin x) / (1 - cos x) * e^x dx', options: ['(1/2)e^x tan(x/2) + C', 'e^x cot(x/2) + C', 'e^x tan(x/2) + C', '-(1/2)e^x cot(x/2) + C'], correctAnswer: 1 }, // ∫ e^x [f(x) + f'(x)] dx. f(x) = cot(x/2). f'(x) = -csc²(x/2) * (1/2). (1-sinx)/(1-cosx) = (1-2sin(x/2)cos(x/2)) / (2sin²(x/2)) = 1/2 csc²(x/2) - cot(x/2). Typo in question?
-            { id: 21, subject: 'Maths', text: 'Area of Δ whose vertices A (1, 2, 3) & B (2, -3, 4) & C (-2, 1, 0)', options: ['0', '3', '2', '1'], correctAnswer: 0 }, // AB = (1, -5, 1). AC = (-3, -1, -3). Area = 1/2 |AB x AC|. |(15 - (-1)), (-3 - (-3)), (-1 - 15)| = 1/2 |(16, 0, -16)| = 1/2 * √(16²+16²) = 1/2 * 16√2 = 8√2. None of the options.
-            { id: 22, subject: 'Maths', text: "Y = F(x²) & F'(x) = e^√x, then dy/dx", options: ['4x e^√x', '4x e^x', '2x e^(2√x)', '2x e^x'], correctAnswer: 3 }, // dy/dx = F'(x²) * (2x) = e^√(x²) * 2x = e^x * 2x.
-            { id: 23, subject: 'Maths', text: 'Area of the region bounded by y-axis, y=sin x, y=cos x, 0 ≤ x ≤ π/2', options: ['√2', '√2 + 1', '√2 - 1', '2(√2 - 1)'], correctAnswer: 2 }, // ∫[0 to π/4] (cos x - sin x) dx = [sin x + cos x][0 to π/4] = (1/√2 + 1/√2) - (0 + 1) = 2/√2 - 1 = √2 - 1.
-            { id: 24, subject: 'Maths', text: 'No of ways in which 8 examination papers be arranged so that the best & worst paper never come together is', options: ['8!', '8! - 7!', 'None', '8! - 2×7!'], correctAnswer: 3 }, // Total ways = 8!. Ways together = (B,W) grouped = 7! * 2! = 2 * 7!. Ways not together = 8! - 2*7!.
-            { id: 25, subject: 'Maths', text: 'A is square matrix of order 3 such that A(adj A) = 10 I, then |adj A|', options: ['10', '10 I', '100', '1'], correctAnswer: 2 }, // A(adj A) = |A| I. So |A| = 10. |adj A| = |A|^(n-1) = 10^(3-1) = 10² = 100.
-            { id: 26, subject: 'Maths', text: 'Differential equation (1-x²) dy/dx - xy = 1', options: ['x sin⁻¹ x = √(1-y²) + C', 'y√(1-x²) = sin⁻¹ x + C', 'x√(1-y²) = sin⁻¹ y + C', 'x sin⁻¹ x = √(1-x²) + C'], correctAnswer: 1 }, // dy/dx - (x/(1-x²))y = 1/(1-x²). IF = e^∫(-x/(1-x²))dx = e^(1/2 ln|1-x²|) = √(1-x²). y*√(1-x²) = ∫(1/√(1-x²))dx = sin⁻¹x + C.
-            { id: 27, subject: 'Maths', text: 'Area of the region bounded by x-axis & Y = √(16-x²)', options: ['20π', '16π', '256π', '8π'], correctAnswer: 3 }, // y² = 16-x² -> x²+y²=16. Semicircle of radius 4. Area = 1/2 * πr² = 1/2 * π(16) = 8π.
-            { id: 28, subject: 'Maths', text: '3 no. chosen randomly from 1 to 20. Probability that they are consecutive is', options: ['5/190', '3/190', '1/120', '18/1140'], correctAnswer: 1 }, // Total ways = 20C3 = 1140. Favorable (1,2,3), (2,3,4)...(18,19,20) = 18 ways. P = 18/1140 = 3/190.
-            { id: 29, subject: 'Maths', text: 'R is relation on set A = {1, 2, 3} given by R = {(1,1), (2,2), (3,3), (1,2), (2,3)}. R is:', options: ['Symmetric', 'Reflexive', 'Transitive', 'Equivalence'], correctAnswer: 1 }, // It has (1,1),(2,2),(3,3). It is reflexive. Not symmetric (no 2,1). Not transitive (1,2 & 2,3 but no 1,3).
-            { id: 30, subject: 'Maths', text: 'If ∫[0 to 1] e^t / (1+t) dt = K, then ∫[0 to 1] e^t / (1+t)² dt =', options: ['K + 1 + e/2', 'K - 1 + e/2', 'K - 1 - e/2', 'K + 1 - e/2'], correctAnswer: 3 }, // IBP on K: u=e^t, dv=(1+t)⁻¹. K = [e^t/(1+t)]? No. IBP on 2nd integral: u=e^t, dv=(1+t)⁻². V = -1/(1+t). ∫ = [-e^t/(1+t)][0,1] - ∫ -e^t/(1+t) dt = (-e/2 - (-1/1)) + K = 1 - e/2 + K.
-            { id: 31, subject: 'Maths', text: 'How many ways can 9 letters be posted in 4 letter box?', options: ['4^5', '3024', '126', '4^9'], correctAnswer: 3 }, // Each of 9 letters has 4 choices. 4*4*...*4 (9 times) = 4^9.
-            { id: 32, subject: 'Maths', text: 'Points on curve x² = 2y, which is nearest to point (0, 5) is', options: ['(2, 2)', '(0, 0)', '(2√2, 4)', '(±4, 8)'], correctAnswer: 2 }, // PDF (0,2) is wrong. Let P=(x,y) = (x, x²/2). D² = (x-0)² + (x²/2 - 5)² = x² + x⁴/4 - 5x² + 25. D²' = 2x + x³ - 10x = x³ - 8x = x(x²-8). x=0, x=±√8 = ±2√2. x=0 -> (0,0). D=5. x=±2√2 -> y = 8/2 = 4. P=(±2√2, 4). D² = 8 + (4-5)² = 8+1 = 9. D=3. (±2√2, 4).
-            { id: 33, subject: 'Maths', text: 'If Determinant [matrix: [a,h,g], [h,b,f], [g,f,c]] = 0, equation ax²+2hxy+by²+2gx+2fy+C=0 represents', options: ['Parabola', 'Ellipse', 'Rectangular hyperbola', 'pair of straight lines'], correctAnswer: 3 },
-            { id: 34, subject: 'Maths', text: 'Reflection of point (a, b, c) on x-y plane', options: ['(a, b, c)', '(0, 0, c)', '(-a, -b, -c)', '(a, b, -c)'], correctAnswer: 3 },
-            { id: 35, subject: 'Maths', text: 'Principle value of tan⁻¹(tan(3π/5))', options: ['-2π/5', '-3π/5', '3π/5', '2π/5'], correctAnswer: 0 }, // 3π/5 is in Q2. tan(3π/5) = tan(π - 2π/5) = -tan(2π/5). tan⁻¹(-tan(2π/5)) = -tan⁻¹(tan(2π/5)) = -2π/5.
-            { id: 36, subject: 'Maths', text: 'A = {a,b,c} & B = {-2,-1,0,1,2}, then the no. of injection from A to B is', options: ['125', '243', '60', '120'], correctAnswer: 2 }, // n(B) P n(A) = 5P3 = 5*4*3 = 60.
-            { id: 37, subject: 'Maths', text: 'Equation 2 cos⁻¹ x + sin⁻¹ x = 11π/6 has', options: ['Two solution', 'unique solution', 'more than 2 solution', 'No solution'], correctAnswer: 3 }, // cos⁻¹x + (cos⁻¹x + sin⁻¹x) = 11π/6. cos⁻¹x + π/2 = 11π/6. cos⁻¹x = 11π/6 - π/2 = 11π/6 - 3π/6 = 8π/6 = 4π/3. Range of cos⁻¹x is [0, π]. 4π/3 is outside range. No solution.
-            { id: 38, subject: 'Maths', text: '3 points P(2x, x+3), Q(0, x) & R(x+3, x+6) are collinear, then x =', options: ['0', '1', '3', '2'], correctAnswer: 1 }, // Slope PQ = Slope QR. (x - (x+3)) / (0 - 2x) = (x+6 - x) / (x+3 - 0). -3 / -2x = 6 / (x+3). 3(x+3) = 6(2x). 3x+9 = 12x. 9 = 9x. x = 1.
-            { id: 39, subject: 'Maths', text: 'X = t², y = t³ then d²y/dx² =', options: ['3 / (2t)', '3/2', '3 / (4t)', '1'], correctAnswer: 2 }, // dy/dt = 3t². dx/dt = 2t. dy/dx = (3t²)/(2t) = 3/2 t. d²y/dx² = d/dt(dy/dx) * (dt/dx) = (3/2) * (1/2t) = 3/4t.
-            { id: 40, subject: 'Maths', text: 'Max. slope of curve Y = -x³ + 3x² + 12x - 5', options: ['0', '15', '12', '16'], correctAnswer: 1 }, // Slope S = Y' = -3x² + 6x + 12. Max slope: S' = -6x + 6 = 0 -> x=1. S_max = -3(1) + 6(1) + 12 = 15.
-            { id: 41, subject: 'Maths', text: 'Function F: [2, ∞) → R is defined by F(x) = x² - 4x + 5, then the range of F is', options: ['[4, ∞)', '[1, ∞)', '[5, ∞)', 'R'], correctAnswer: 1 }, // Vertex at x = -b/2a = 4/2 = 2. f(2) = 4 - 8 + 5 = 1. Since domain starts at vertex, range is [1, ∞).
-            { id: 42, subject: 'Maths', text: 'Force F about a point is (PDF unclear)', options: ['|μ x F|', '|μ x F| / |F|', '|F|', '|μ x F| / |μ|'], correctAnswer: 0 }, // Assuming this means "Moment" or "Torque", which is r x F.
-            { id: 43, subject: 'Maths', text: 'f(x) = x³ - ax + 5. F is strictly increasing on (1, 2), then a lies in intequal', options: ['(4, ∞)', '(2, ∞)', '(-∞, 2)', '(-∞, 3)'], correctAnswer: 3 }, // f'(x) = 3x² - a. f'(x) > 0 for (1,2). 3x² > a. At x=1, 3(1) > a -> a < 3.
-            { id: 44, subject: 'Maths', text: 'If A is a 3x3 matrix and |A|=3, then adj(A) =', options: ['3A', '3A^t', 'A^t', '9A⁻¹'], correctAnswer: 3 }, // adj(A) = |A| * A⁻¹ = 3 * A⁻¹. Wait. 3A⁻¹ is not an option. But 9A⁻¹ is. adj(A) = |A|A⁻¹.
-            { id: 45, subject: 'Maths', text: 'No. of unit vectors ⊥ to the vectors μ = 2i+j+2k & ν = j+k', options: ['3', 'infinite', '2', '1'], correctAnswer: 2 }, // Two vectors: (μ x ν) / |μ x ν| and -(μ x ν) / |μ x ν|.
-            { id: 46, subject: 'Maths', text: '∫[0 to π/4] log(1 + tan x) dx', options: ['(π/2) log 2', '(π/8) log 2', 'π log 2', '4π log 2'], correctAnswer: 1 }, // Standard property. I = (π/8) log 2.
-            { id: 47, subject: 'Maths', text: 'dy/dx = (1+y²)/(1+x²), [solution of differential equation]', options: ['y - x = (1+2y)', 'y = tan⁻¹ x + C', 'tan(xy) = C', 'tan⁻¹ y = tan⁻¹ x + C'], correctAnswer: 3 }, // ∫dy/(1+y²) = ∫dx/(1+x²). tan⁻¹y = tan⁻¹x + C. (Option d in PDF is x=tan⁻¹y + C, which is wrong. tan⁻¹y = x+C is also wrong).
-            { id: 48, subject: 'Maths', text: 'a, b, c unit vectors such that a+b+c = 0, value of a·b + b·c + c·a', options: ['3/2', '-3/2', 'None', '-1'], correctAnswer: 1 }, // |a+b+c|² = 0. |a|²+|b|²+|c|² + 2(a·b + b·c + c·a) = 0. 1+1+1 + 2(X) = 0. 3 + 2X = 0. X = -3/2.
-            { id: 49, subject: 'Maths', text: '∫ x / (4 + x⁴) dx', options: ['(1/2) tan⁻¹(2x²) + C', '(1/4) tan⁻¹(x²/2) + C', '(1/2) tan⁻¹(x²/2) + C', '(1/4) tan⁻¹(x²) + C'], correctAnswer: 1 }, // u = x². du = 2x dx. 1/2 ∫ du / (4 + u²) = 1/2 * (1/2) tan⁻¹(u/2) + C = 1/4 tan⁻¹(x²/2) + C.
-            { id: 50, subject: 'Maths', text: 'P(A) = 0.4, P(A∪B) = 0.7, if A & B are mutually exclusive events then value of P(B) is', options: ['0.4', '0.3', '0.5', '0.6'], correctAnswer: 1 }, // P(A∪B) = P(A) + P(B). 0.7 = 0.4 + P(B). P(B) = 0.3.
-
-            // --- PHYSICS (51-90) ---
-            { id: 51, subject: 'Physics', text: 'A body has weight 72N. When it is taken to height h=R (R=radius of earth) it would weight', options: ['18N', '18 N', 'Zero', '36N'], correctAnswer: 0 }, // W' = W * (R / (R+h))² = 72 * (R / 2R)² = 72 * (1/4) = 18N.
-            { id: 52, subject: 'Physics', text: 'The ratio of amplitude of magnetic field to the amplitude of electric field for an electromagnetic wave propagation in vacuum is equal to?', options: ['The speed of light in vacuum', 'Reciprocal of speed of light in vacuum', 'The ratio of magnetic permeability to the electric susceptibility of vacuum', 'Unity'], correctAnswer: 1 }, // E/B = c. B/E = 1/c.
-            { id: 53, subject: 'Physics', text: 'The electric dipole moment of an e⁻ and proton 4.3 nm apart is', options: ['11e-46 C-m', '2.56e-29 C-m', '6.8e-28 C-m', '3.72e-14 C-m'], correctAnswer: 2 }, // p = qd = 1.6e-19 * 4.3e-9 = 6.88e-28 C-m.
-            { id: 54, subject: 'Physics', text: 'If two balls are projected at angle 45° and 60° & have same max height, is the ratio of their initial velocities (v1:v2)', options: ['√3 : √2', '2 : 3', '3 : 2', '√2 : √3'], correctAnswer: 0 }, // H = (v sinθ)² / 2g. (v1 sin45)² = (v2 sin60)². v1²(1/2) = v2²(3/4). v1²/v2² = (3/4) / (1/2) = 3/2. v1/v2 = √3 / √2.
-            { id: 55, subject: 'Physics', text: 'If torque is zero then', options: ['angular momentum is not conserved', 'energy is conserved', 'linear momentum is conserved', 'angular momentum is conserved'], correctAnswer: 3 },
-            { id: 56, subject: 'Physics', text: 'If earth suddenly shrinks to half of its present radius then acceleration due to gravity will be', options: ['4g', 'g/2', 'g/4', '2g'], correctAnswer: 0 }, // g = GM/R². g' = GM/(R/2)² = GM / (R²/4) = 4 * (GM/R²) = 4g.
-            { id: 57, subject: 'Physics', text: 'In a certain region of space with volume 0.2m³ the electric potential is found to be 5V throughout. The magnitude of electric field in this region is', options: ['zero', '1 N/C', '5 N/C', '0.5 N/C'], correctAnswer: 0 }, // E = -dV/dr. Since V is constant, dV=0, so E=0.
-            { id: 58, subject: 'Physics', text: 'A body falling vertically downwards under gravity breaks in two parts of unequal masses. The centre of mass of two parts taken together shifts horizontally towards', options: ['Lighter piece', 'depends on the vertical velocity at the time of breaking', 'does not shift horizontally', 'heavier piece'], correctAnswer: 2 }, // Internal forces only. No external horizontal force.
-            { id: 59, subject: 'Physics', text: 'A ball of mass(m) is moving towards a player with velocity v. If player stopped it, the impulse applied by the player is', options: ['+2mv', '-mv', '-mu', '-2mu'], correctAnswer: 1 }, // Impulse = Δp = p_final - p_initial = 0 - (mv) = -mv.
-            { id: 60, subject: 'Physics', text: 'Two wires of same materials, length & diameter in the ratio 1:2 are stretched by same force. The U (stored energy) per unit volume ratio is', options: ['4:1', '2:1', '16:1', '1:1'], correctAnswer: 2 }, // u = 1/2 * Stress * Strain = 1/2 * (F/A) * (Stress/Y) = 1/2 * (F/A)² / Y. u ∝ 1/A² ∝ 1/d⁴. u1/u2 = (d2/d1)⁴ = (2/1)⁴ = 16.
-            { id: 61, subject: 'Physics', text: 'Two bodies of masses 1kg & 2 kg are lying in xy plane at (-1, 2) & (2, 4) respective. Co-ordinates of COM are:', options: ['None of these', '(0, 1)', '(1, 0)', '(1, 10/3)'], correctAnswer: 3 }, // X = (1*(-1) + 2*2) / (1+2) = 3/3 = 1. Y = (1*2 + 2*4) / 3 = 10/3.
-            { id: 62, subject: 'Physics', text: 'If Re is the Reynold\'s number then which of the following is incorrect', options: ['For 1000 < Re < 2000 Flow is steady', 'For Re < 1000 flow is laminar', 'For Re > 2000, Flow is turbulent', 'All are incorrect'], correctAnswer: 0 }, // 1000-2000 is transitional and unsteady.
-            { id: 63, subject: 'Physics', text: 'A charge Q is enclosed by a Gaussian spherical surface of Radius R. If Radius is doubled then the outward electric flux will', options: ['increase four time', 'remain the same', 'be reduced to half', 'be doubled'], correctAnswer: 1 }, // Flux = Q_enclosed / ε₀. Independent of radius.
-            { id: 64, subject: 'Physics', text: 'In elastic collision,', options: ['Only KE is conserved', 'Only momentum is conserved', 'Neither KE on momentum is conserved', 'Both are conserved'], correctAnswer: 3 },
-            { id: 65, subject: 'Physics', text: 'A solid sphere is rotating freely about its symmetric axis in free space. The radius of the sphere is increased keeping its mass same, which of the following physical quantities would remain constant', options: ['Rotational KE', 'Angular momentum', 'Angular velocity', 'Moment of inertia'], correctAnswer: 1 }, // No external torque, L = Iω is conserved.
-            { id: 66, subject: 'Physics', text: 'Two pure inductor each of self-inductance L are connected in parallel but are well separated from each other. The total inductance', options: ['L/2', '2L', 'L', 'L/4'], correctAnswer: 0 }, // 1/L_eq = 1/L + 1/L = 2/L. L_eq = L/2.
-            { id: 67, subject: 'Physics', text: 'If a carnot engine functions at source temperature = 127°C (400K) & sink temp = 87°C (360K), what is its efficiency', options: ['10%', '40%', '50%', '25%'], correctAnswer: 0 }, // η = 1 - T_c/T_h = 1 - 360/400 = 1 - 0.9 = 0.1 = 10%.
-            { id: 68, subject: 'Physics', text: 'The diameter of a hollow metallic sphere is 60cm and the sphere carries a charge of 500μC. The potential at a distance of 100cm from the centre of the sphere will be', options: ['4.5 x 10^6 V', '5 x 10^6 V', '7 x 10^6 V', '6 x 10^-6 V'], correctAnswer: 0 }, // V = kQ/r (for r > R) = (9e9 * 500e-6) / 1.0 = 4500e3 = 4.5e6 V.
-            { id: 69, subject: 'Physics', text: 'Two solid conductors are made up of same material have same length & same resistance. One of them have circular cross section of area A1 and the other one has a square cross section A2. The ratio A1/A2 is', options: ['1:5', '1', '0.8', '2'], correctAnswer: 1 }, // R = ρL/A. Since R, ρ, L are same, A must be same. A1 = A2. A1/A2 = 1.
-            { id: 70, subject: 'Physics', text: 'The escape velocity for a body of mass 1kg from earth surface is 11.2 km s⁻¹. The escape velocity for a body of mass 100 kg would be', options: ['11.2 km s⁻¹', '112 km s⁻¹', '11.2 x 10² kg ms⁻¹', '11.2 x 10² kg ms⁻¹'], correctAnswer: 0 }, // v_e = √(2GM/R). Independent of mass of body.
-            { id: 71, subject: 'Physics', text: 'In young double slit experiment green light (λ = 5461 Å) is used & 60 Fringes were seen in the field view. Now sodium light is used (λ = 5890 Å) then the number of fringes observed are', options: ['40', '55', '50', '60'], correctAnswer: 1 }, // nλ = constant. n1λ1 = n2λ2. 60 * 5461 = n2 * 5890. n2 = (60 * 5461) / 5890 ≈ 55.6. So 55 fringes.
-            { id: 72, subject: 'Physics', text: 'A body is executing SHM with an amplitude of 0.1 m. Its velocity while passing through the mean position is 3 ms⁻¹. Its Frequency is', options: ['30/π', '25/π', '15/π', '15π'], correctAnswer: 2 }, // v_max = Aω = A(2πf). 3 = 0.1 * (2πf). 3 = 0.2πf. f = 3 / 0.2π = 15/π.
-            { id: 73, subject: 'Physics', text: 'A force F = (2i+3j+4k) N acting on a body for 4s produces displacement d = (3i+4j+5k) m. The power used.', options: ['9.5W', '7.5W', '6.5W', '4.5W'], correctAnswer: 0 }, // W = F·d = (2*3) + (3*4) + (4*5) = 6 + 12 + 20 = 38 J. P = W/t = 38 J / 4 s = 9.5 W.
-            { id: 74, subject: 'Physics', text: 'A particle is moving with constant angular velocity along the circumference of a circle. Which of the statement is true?', options: ['The projection of a particle on any of the diameter executes SHM', 'The projection of a particle on any one of the diameters executes SHM', 'None of the above', 'The particle executes SHM'], correctAnswer: 0 },
-            { id: 75, subject: 'Physics', text: 'A particle of mass 0.10 kg executes SHM with an amplitude 0.05m & frequency 20 vib/s. Its energy of oscillation', options: ['2J', '4J', '1J', '0'], correctAnswer: 0 }, // E = 1/2 m A² ω² = 1/2 * 0.1 * (0.05)² * (2π*20)² = 0.05 * 0.0025 * (40π)² = 0.05 * 0.0025 * 1600π² = 0.2π² ≈ 1.97 J.
-            { id: 76, subject: 'Physics', text: 'The ratio of terminal velocity of two drops of Radii R & R/2 is', options: ['4', '2', '1', '1/2'], correctAnswer: 0 }, // v_T ∝ R². v1/v2 = (R)² / (R/2)² = R² / (R²/4) = 4.
-            { id: 77, subject: 'Physics', text: 'Intrinsic semiconductor is electrically neutral. Extrinsic semiconductor having large number of current carries would be', options: ['-ve charged', '+ve charged or -ve charged depending upon the type of impurity', 'electrically neutral', 'positively charged'], correctAnswer: 2 },
-            { id: 78, subject: 'Physics', text: 'In which of the following transition will the wavelength be minimum', options: ['n=2 to n=1', 'n=3 to n=2', 'n=4 to n=3', 'n=5 to n=4'], correctAnswer: 0 }, // Min wavelength = Max energy gap.
-            { id: 79, subject: 'Physics', text: 'A particle of mass 2kg is moving along a circular path of radius 1m. If angular speed is 2π rad s⁻¹. The centripetal force on it is', options: ['8π N', '4π N', '4π² N', '8π² N'], correctAnswer: 3 }, // F = mω²r = (2) * (2π)² * (1) = 2 * 4π² = 8π².
-            { id: 80, subject: 'Physics', text: 'Some electric bulbs are connected in series across a 220 V supply in a room. If one bulb is fused the remaining bulbs are connected in series across the same supply. The illumination in the room will', options: ['not continuous', 'increase', 'decrease', 'remain the same'], correctAnswer: 1 }, // One bulb fused. R_total decreases. I = V/R_total increases. P = I²R. Power of *each* remaining bulb increases.
-            { id: 81, subject: 'Physics', text: 'The torque of force F = -3i + j + 5k acting on a point r = 7i + 3j + 5k about origin will be', options: ['4i + 4j + 6k', '-14i + 38j - 16k', '-21i + 3j + 5k', '14i - 38j + 16k'], correctAnswer: 1 }, // τ = r x F = |i(15-5) - j(-15 - 35) + k(-9 - 7)| = 10i + 50j - 16k. Recheck. i(3*5 - 1*5) = 10i. j(7*5 - (-3)*5) = j(35+15)=50j. k(7*1 - (-3)*3) = k(7+9)=16k. τ = 10i + 50j + 16k. My answer is not in options.
-            { id: 82, subject: 'Physics', text: 'A block of mass 2kg is placed on the floor. The co-efficient of static friction is 0.4. If a force of 2.8 N is applied on block || to the floor. The friction between block & floor is', options: ['2.8N', '2N', '0', '8N'], correctAnswer: 0 }, // f_s_max = μN = 0.4 * (2*9.8) = 7.84 N. Applied F (2.8N) < f_s_max. Static friction = Applied F.
-            { id: 83, subject: 'Physics', text: 'A circular coil of 20 turns & R = 10cm is placed in uniform magnetic field of 0.10T ⊥ to plane of the coil. The current in coil is 5A, the torque acting', options: ['0.314 Nm', '31.4Nm', '3.14 Nm', '0'], correctAnswer: 3 }, // B is ⊥ to plane, so B is || to Area vector. θ = 0. τ = NIAB sinθ = NIAB sin(0) = 0.
-            { id: 84, subject: 'Physics', text: 'The current through wire depends on time as I = 3t² + 2t + 5. The charge flowing through the cross section of wire time interval between t=0 to t=2s is', options: ['22C', '5C', '20C', '18C'], correctAnswer: 0 }, // Q = ∫I dt = ∫(3t² + 2t + 5) dt = [t³ + t² + 5t] from 0 to 2 = (8 + 4 + 10) - 0 = 22C.
-            { id: 85, subject: 'Physics', text: 'The potential of two plates capacitor are +10v and -10v respectively. The charge on one of the plate is 40C. The capacitance of the capacitor is', options: ['0.5F', '4F', '0.25F', '2F'], correctAnswer: 3 }, // C = Q / ΔV = 40 / (10 - (-10)) = 40 / 20 = 2F.
-            { id: 86, subject: 'Physics', text: 'The electric dipole moment of an electron and a proton 4.3 nm apart is', options: ['11e-46 C²/m', '6.8e-28 cm', '2.56e-29 C²/m', '3.72e-14 c/m'], correctAnswer: 1 }, // Same as Q53. p = qd = 1.6e-19 * 4.3e-9 = 6.88e-28 C-m ≈ 6.8e-26 C-cm.
-            { id: 87, subject: 'Physics', text: 'A string of length 1m has the mass/length 0.1g/cm. What will be the fundamental frequency under tension of 400N?', options: ['400 Hz', '50 Hz', '200 Hz', '100 Hz'], correctAnswer: 3 }, // μ = 0.1 g/cm = 0.01 kg/m. v = √(T/μ) = √(400 / 0.01) = √40000 = 200 m/s. f = v/2L = 200 / (2*1) = 100 Hz.
-            { id: 88, subject: 'Physics', text: 'A current I=2A passes through a cell of emf 1.5V, internal resistance r=0.15Ω. The potential difference across both ends of the cell is', options: ['1.5V', '1.35V', '1.0V', '1.2V'], correctAnswer: 3 }, // V = E - Ir = 1.5 - (2)(0.15) = 1.5 - 0.3 = 1.2V.
-            { id: 89, subject: 'Physics', text: 'Two ions having masses in the ratio 1:1 & charges 1:2 projected ⊥ to the field of cyclotron with speed ratio 2:3. The ratio of radii of circular path... is', options: ['3:1', '1:3', '1:4', '4:3'], correctAnswer: 3 }, // r = mv/qB. r1/r2 = (m1/m2) * (v1/v2) * (q2/q1) = (1/1) * (2/3) * (2/1) = 4/3.
-            { id: 90, subject: 'Physics', text: 'In a Rutherford scattering experiment... the distance of closest approach is r₀. The energy of projectile is:', options: ['Directly proportional to z1z2', 'Inversely proportional to z1', 'Directly proportional to mass M1', 'Directly proportional to M1 x M2'], correctAnswer: 0 }, // KE = (k z1 z2 e²) / r₀. KE ∝ z1z2.
-
-            // --- CHEMISTRY (91-110) ---
-            { id: 91, subject: 'Chemistry', text: 'The pKa & pKb are 4.78 & 4.72 respectively. The pH of corresponding salt will be', options: ['11.775', '6.995', '7.005', '7.03'], correctAnswer: 3 }, // pH = 7 + 1/2(pKa - pKb) = 7 + 1/2(4.78 - 4.72) = 7 + 0.03 = 7.03.
-            { id: 92, subject: 'Chemistry', text: 'Correct value of wavelength of light having period of 2.0 x 10⁻¹⁰ s is', options: ['6 x 10⁻⁵ m', '6 x 10⁻⁴ m', '6 x 10⁻¹ m', '6 x 10⁻² m'], correctAnswer: 3 }, // λ = c * T = 3e8 * 2e-10 = 6e-2 m.
-            { id: 93, subject: 'Chemistry', text: 'Quantity of electricity needed to reduce 1 mole of Cr₂O₇²⁻ (to Cr³⁺)', options: ['6 F', '12 F', '2 F', '4 F'], correctAnswer: 0 }, // Cr₂ (+6 each) -> 2 Cr³⁺ (+3 each). Change = 2 * (6-3) = 6e⁻.
-            { id: 94, subject: 'Chemistry', text: 'Among the following species which has largest size: Ca²⁺, K⁺, Cl⁻, S²⁻', options: ['Cl⁻', 'Ca²⁺', 'S²⁻', 'K⁺'], correctAnswer: 2 }, // All are isoelectronic. S²⁻ has fewest protons for same e⁻, so largest.
-            { id: 95, subject: 'Chemistry', text: 'The value of Kc for the reaction 2NOCl(g) ⇌ 2NO(g) + Cl₂(g). Kp = 1.8 x 10⁻² at 500 K', options: ['8.3e-4 mol/L', '0.43e-4 mol/L', '2.15e-4 mol/L', '4.3e-4 mol/L'], correctAnswer: 3 }, // Δn = (2+1) - 2 = 1. Kp = Kc(RT)¹ -> Kc = Kp / RT = 1.8e-2 / (0.0821 * 500) = 4.38e-4.
-            { id: 96, subject: 'Chemistry', text: '32g of methanol (CH₃OH) contains same no. of molecules as contain in', options: ['32g Ammonia', '32g H₂SO₄', '32g Oxygen gas', '32g H₂O'], correctAnswer: 2 }, // M(CH₃OH) = 12+4+16=32 g/mol. 32g = 1 mol. M(O₂) = 32 g/mol. 32g = 1 mol.
-            { id: 97, subject: 'Chemistry', text: 'Chloroform on decomposition in the presence of air or light gives HCl gas along with poisonous gas have chemical formula', options: ['COCl₃', 'COCl₂', 'CH₃NC', 'CO'], correctAnswer: 1 }, // Phosgene
-            { id: 98, subject: 'Chemistry', text: 'On hydrogenation ethene gives', options: ['Butane', 'Methane', 'Ethane', 'ethane'], correctAnswer: 2 },
-            { id: 99, subject: 'Chemistry', text: 'Increasing boiling point order', options: ['methoxy methane < Propan-1-ol < Propanal', 'methoxy methane < Propanal < Propan-1-ol', 'Propan-1-ol < methoxy methane < Propanal', 'Propanal < Propan-1-ol < methoxy methane'], correctAnswer: 1 }, // Ether (no H-bond) < Aldehyde (dipole-dipole) < Alcohol (H-bond).
-            { id: 100, subject: 'Chemistry', text: "Van't hoff factor for AlCl₃ (assuming 100% dissociation)", options: ['2', '3', '4', '5'], correctAnswer: 2 }, // AlCl₃ -> Al³⁺ + 3Cl⁻. 1+3 = 4 particles.
-            { id: 101, subject: 'Chemistry', text: 'In apollo space craft the fuel cell used was', options: ['H₂ - O₂ fuel cell', 'Both a & b', 'CH₄ - O₂ fuel cell', 'None'], correctAnswer: 0 },
-            { id: 102, subject: 'Chemistry', text: 'Spin only moment of M²⁺ ion (Z=28, Ni)', options: ['3.87 B.M', '2.87 B.M.', '0 B.M.', '5.37 B.M.'], correctAnswer: 1 }, // Ni²⁺ = [Ar] 3d⁸. 2 unpaired e⁻. μ = √n(n+2) = √2(4) = √8 ≈ 2.83 B.M.
-            { id: 103, subject: 'Chemistry', text: 'When formaldehyde reacts with which one of the following compound to give Urotropine', options: ['Methtyl amine', 'Ammonia', 'Ammonium hydroxide', 'Ammonium chloride'], correctAnswer: 1 },
-            { id: 104, subject: 'Chemistry', text: "Glucose is oxidized into gluconic acid By Tollen's reagent this can be identified through", options: ['formation of red ppt', 'formation of silver mirror', 'evolution of gas', 'formation of yellow ppt'], correctAnswer: 1 },
-            { id: 105, subject: 'Chemistry', text: 'Conjugate base of NH₃', options: ['N₂H₄', 'NH₂⁻', 'NH₄⁺', 'NH₄OH'], correctAnswer: 1 },
-            { id: 106, subject: 'Chemistry', text: 'Haloalkane reacts with AgCN to form', options: ['alkyl cyanide', 'alkyl aryl isocyanide', 'alkyl isocyanide', 'alkyl aryl cyanide'], correctAnswer: 2 }, // AgCN is covalent, attacks via N. KCN is ionic, attacks via C.
-            { id: 107, subject: 'Chemistry', text: 'Nitrogen base found in RNA', options: ['cytosine, adenine, uracil, Guanine', 'cytosine, adenine, uracil, Thyamine', 'cytosine, adenine, Thyamine, Uracil', 'cytosine, adenine, uracil'], correctAnswer: 0 },
-            { id: 108, subject: 'Chemistry', text: 'O₂⁻ is', options: ['paramagnetic having bond order 1.5', 'paramagnetic having bond order 2', 'diamagnetic having bond order 1', 'diamagnetic having bond order 3'], correctAnswer: 0 }, // Superoxide. 1 unpaired e⁻ in π* orbitals. BO = 1/2 (10 - 7) = 1.5.
-            { id: 109, subject: 'Chemistry', text: 'IUPAC name of [Co(NH₃)₅Cl]Cl₂ is', options: ['pentaamminechlorido cobalt(III) chloride', 'pentaamminechlorido cobalt(II) chloride', 'pentaamminechlorido cobalt(III) chlorido', 'pentaamminechlorido cobaltate (III) chloride'], correctAnswer: 0 },
-            { id: 110, subject: 'Chemistry', text: 'No of coordinated water is [CuSO₄.5H₂O] is', options: ['2', '3', '1', '4'], correctAnswer: 3 }, // [Cu(H₂O)₄]SO₄·H₂O. 4 are coordinated.
-
-            // --- ENGLISH (111-150) ---
-            { id: 111, subject: 'English', text: 'After the long hike, we were all feeling quiet ___ and needed a rest', options: ['Depleted', 'drained', 'exhausted', 'fatigue'], correctAnswer: 1 }, // 'drained' or 'exhausted' fit.
-            { id: 112, subject: 'English', text: 'One who studied evolution of mankind', options: ['Anthropologist', 'Geologist', 'Sociologist', 'Archaeologist'], correctAnswer: 0 },
-            { id: 113, subject: 'English', text: 'She ___ have gone to the party, because I didn\'t see her there', options: ['Wouldn\'t', 'might not', 'Can\'t', 'Shouldn\'t'], correctAnswer: 2 }, // 'Can't' implies strong certainty of her absence. 'Might not' is also plausible.
-            { id: 114, subject: 'English', text: 'A person who is talkative', options: ['Chatty', 'Loquacious', 'Taciturn', 'Reticent'], correctAnswer: 1 }, // Loquacious is the formal word.
-            { id: 115, subject: 'English', text: 'The team performance was so ___ that they were awarded the champioship', options: ['Commendable', 'outstanding', 'exceptional', 'competent'], correctAnswer: 1 }, // 'outstanding' or 'exceptional'
-            { id: 116, subject: 'English', text: 'The play was written by John Donne (Active)', options: ['The play is written by John Donne', 'John Donne wrote the play', 'John Donne is writing the play', 'The play has been written by John Donne.'], correctAnswer: 1 },
-            { id: 117, subject: 'English', text: 'The book published after the death of author', options: ['Manuscript', 'Post Mortem', 'Posthumous', 'Premortem'], correctAnswer: 2 },
-            { id: 118, subject: 'English', text: 'Our professor\'s lecture was quite verbose (Antonym)', options: ['Brief', 'lengish', 'lengthy', 'concise'], correctAnswer: 3 },
-            { id: 119, subject: 'English', text: 'I ---- in Dublin for three years now', options: ['Lived', 'living', 'am living', 'have been living'], correctAnswer: 3 },
-            { id: 120, subject: 'English', text: 'If it ----- tomorrow, we will stay indoors', options: ['Rains', 'would rain', 'will rain', 'should rains'], correctAnswer: 0 },
-            { id: 121, subject: 'English', text: 'Today the politician\'s speech was full of rhetoric. (Meaning)', options: ['Incoherent', 'figurative lang', 'persuasive lang', 'factual lang'], correctAnswer: 2 },
-            { id: 122, subject: 'English', text: 'The artist\'s use of colour was ___', options: ['Muted', 'expressive', 'vibrant', 'restless'], correctAnswer: 2 }, // Incomplete, 'vibrant' is a positive choice.
-            { id: 123, subject: 'English', text: 'The instruction were vague making it difficult to assemble the furniture (Synonym)', options: ['Clear', 'incomplete', 'ambiguous', 'confusing'], correctAnswer: 2 },
-            { id: 124, subject: 'English', text: 'The scientist\'s ___ research led to a breakthrough in medicine', options: ['Systematic', 'meticulous', 'haphazard', 'arbitrary'], correctAnswer: 1 },
-            { id: 125, subject: 'English', text: 'The inadvertent mistake led to a huge loss (Synonym)', options: ['Intentional', 'Miscalculated', 'Predictable', 'unintentional'], correctAnswer: 3 },
-            { id: 126, subject: 'English', text: 'The preamble to the constitution outline the fundamental principle (Synonym)', options: ['Article', 'conclusion', 'amendment', 'Introduction'], correctAnswer: 3 },
-            { id: 127, subject: 'English', text: 'The company profit began to dwindle (Synonym)', options: ['Increase', 'diminish', 'Stabilize', 'fluctuate'], correctAnswer: 1 },
-            { id: 128, subject: 'English', text: 'By the time I arrived, they ___ finished the project', options: ['Should have', 'Must have', 'Ought to', 'Would have'], correctAnswer: 3 }, // 'Had finished' (Q139) is better, but 'would have' implies expectation.
-            { id: 129, subject: 'English', text: 'The billionaire\'s grandeur plans for a luxury skyscrapers were met with skepticism by city office (Antonym)', options: ['Ambitious', 'Lavish', 'Extravagant', 'Modest'], correctAnswer: 3 },
-            { id: 130, subject: 'English', text: 'If I ___ choose between the two option I would choose the first one', options: ['Were to', 'Had to', 'Should', 'Might'], correctAnswer: 1 }, // 'Were to' (subjunctive) is also correct.
-            { id: 131, subject: 'English', text: 'The new policy was implemented by the management (Active)', options: ['The management implemented the new policy', 'The new policy has been implemented', 'The management is implementing the new policy', 'The new policy is being implemented'], correctAnswer: 0 },
-            { id: 132, subject: 'English', text: 'The professor grades the papers (Passive)', options: ['The paper is being graded by the professor', 'The papers are graded by the professor', 'The professor is grading the paper', 'The paper has been graded'], correctAnswer: 1 },
-            { id: 133, subject: 'English', text: 'They ----- taken the earlier flight, but they missed it', options: ['Could have', 'should have', 'would have', 'must have'], correctAnswer: 1 }, // 'Should have' implies regret. 'Could have' implies option.
-            { id: 134, subject: 'English', text: 'A group of three novels or plays with a common theme', options: ['Anthology', 'Trilogy', 'chronicle', 'series'], correctAnswer: 1 },
-            { id: 135, subject: 'English', text: 'The visible sign of wear and tear on the building needed repair (Synonym)', options: ['Concealed', 'unnoticeable', 'noticeable', 'obvious'], correctAnswer: 3 },
-            { id: 136, subject: 'English', text: 'The researcher\'s assertion that climate change is irreversible has sparked intense debate (Synonym)', options: ['Concession', 'claim', 'denial', 'Hypothesis'], correctAnswer: 1 },
-            { id: 137, subject: 'English', text: 'The serendipitous discovery led to a breakthrough (Synonym)', options: ['Intentional', 'accidental', 'planned', 'deliberate'], correctAnswer: 1 },
-            { id: 138, subject: 'English', text: 'The company has hired new employees (Passive)', options: ['New employees are being hired', 'The company is hiring new employee', 'New employees have been hired by company', 'New employees are hired by company'], correctAnswer: 2 },
-            { id: 139, subject: 'English', text: 'By the time I arrived, they --- their project', options: ['Had finished', 'have finished', 'finish', 'were finished'], correctAnswer: 0 },
-            { id: 140, subject: 'English', text: 'The chef cook the meal (Passive - "cook" is present tense)', options: ['The meal is being cooked by the chef', 'The meal is cooked by the chef', 'The meal cooks by the chef', 'The chef is cooking the meal'], correctAnswer: 1 },
-            { id: 141, subject: 'English', text: 'The old house was filled with ___ furniture and dusty artifacts', options: ['Contemporary', 'Antique', 'Orchard', 'Historical'], correctAnswer: 1 },
-            { id: 142, subject: 'English', text: 'The politician made an ....... speech that left the audience speechless', options: ['Impactful', 'elaborate', 'articulate', 'eloquent'], correctAnswer: 3 },
-            { id: 143, subject: 'English', text: 'The detective had ___ for solving complex cases', options: ['An instinct', 'an aptitude', 'a talent', 'an inclination'], correctAnswer: 1 },
-            { id: 144, subject: 'English', text: 'She was fastidious about her work and never compromised on the quality (Antonym)', options: ['Indifferent', 'painstaking', 'lazy', 'careless'], correctAnswer: 3 },
-            { id: 145, subject: 'English', text: 'A statement that is seemingly contradictory but may be true', options: ['Oxymoron', 'Epigram', 'Paradox', 'Hyperbole'], correctAnswer: 2 },
-            { id: 146, subject: 'English', text: 'If I .......... the solution, I would tell you', options: ['Knew', 'know', 'have known', 'had known'], correctAnswer: 0 },
-            { id: 147, subject: 'English', text: 'The artist\'s work was considered eccentric (Antonym)', options: ['Common', 'Conventional', 'unusual', 'typical'], correctAnswer: 1 },
-            { id: 148, subject: 'English', text: 'The tech company product was at the cutting edge of industry trends (Opposite)', options: ['State of the art', 'obsolete', 'behind the times', 'traditional'], correctAnswer: 2 },
-            { id: 149, subject: 'English', text: 'By the next year, I ___ chinese for five years', options: ['Am studying', 'Study', 'Will have been studying', 'Have been studying'], correctAnswer: 2 },
-            { id: 150, subject: 'English', text: 'A person who composes or write a dictionary', options: ['Cartographer', 'Lexicographer', 'Stenographer', 'Calligrapher.'], correctAnswer: 1 },
-
-            // --- GS (151-170) ---
-            { id: 151, subject: 'GS', text: 'Arrange the following planets in ascending order of their distance from the sun: I. Jupiter, II. Venus, III. Mercury, IV. Mars, V. Earth', options: ['I, IV, V, II, III', 'III, II, V, IV, I', 'I, V, IV, II, III', 'III, II, IV, V, I'], correctAnswer: 1 }, // Mercury, Venus, Earth, Mars, Jupiter
-            { id: 152, subject: 'GS', text: 'Which country... (Question incomplete in PDF)', options: ['Saudi Arabia', 'Indonesia', 'Nepal', 'Norway.'], correctAnswer: 0 }, // Placeholder
-            { id: 153, subject: 'GS', text: 'The Digboi oil refinery in India is located at', options: ['Andhra Pradesh', 'Himachal Pradesh', 'Uttar Pradesh', 'Assam'], correctAnswer: 3 },
-            { id: 154, subject: 'GS', text: 'Headquarter of National institute of oceanography is located?', options: ['Andhra Pradesh', 'Goa', 'New Delhi', 'Mumbai'], correctAnswer: 1 }, // Dona Paula, Goa
-            { id: 155, subject: 'GS', text: 'The oldest port in India:', options: ['Chennai', 'Kolkata', 'Lothal', 'Vishakhapatnam'], correctAnswer: 2 }, // Ancient Indus Valley port
-            { id: 156, subject: 'GS', text: 'Which state is known as the "rice bowl of India"?', options: ['Madhya Pradesh', 'Haryana', 'Andhra Pradesh', 'Punjab.'], correctAnswer: 2 },
-            { id: 157, subject: 'GS', text: 'Which state in India has the least literacy rate?', options: ['West Bengal', 'Andhra Pradesh', 'Bihar', 'Kerala'], correctAnswer: 2 }, // Bihar (as per 2011 census)
-            { id: 158, subject: 'GS', text: 'Which one of the following is the union territories of India?', options: ['Mizoram', 'Nagaland', 'Lakshadweep', 'Tamil Nadu'], correctAnswer: 2 },
-            { id: 159, subject: 'GS', text: 'Which is the southernmost port of India ?', options: ['Vizag port', 'Cochin port', 'Chennai port', 'Tuticorin'], correctAnswer: 3 }, // Tuticorin (V.O. Chidambaranar Port)
-            { id: 160, subject: 'GS', text: 'Surat is situated on the bank of which river?', options: ['Ganges', 'Tapi', 'Godavari', 'Yamuna'], correctAnswer: 1 },
-            { id: 161, subject: 'GS', text: 'Ghoomar is a famous dance of which state?', options: ['Karnataka', 'Rajasthan', 'UP', 'Andhra Pradesh'], correctAnswer: 1 },
-            { id: 162, subject: 'GS', text: 'Which state is known as "Land of five rivers"?', options: ['Punjab', 'Maharashtra', 'Kerala', 'Haryana'], correctAnswer: 0 },
-            { id: 163, subject: 'GS', text: 'Which one of the following planets is the nearest to the sun?', options: ['Jupiter', 'Mars', 'Mercury', 'Saturn'], correctAnswer: 2 },
-            { id: 164, subject: 'GS', text: 'Koyana multipurpose project is in which state ?', options: ['UP', 'Nagaland', 'Assam', 'Maharashtra'], correctAnswer: 3 },
-            { id: 165, subject: 'GS', text: 'Deepest port India?', options: ['Cochin port', 'Gangavaram port', 'Kandla port', 'JNPT'], correctAnswer: 1 }, // Gangavaram Port, Andhra Pradesh
-            { id: 166, subject: 'GS', text: 'Guwahati is situated on the bank of which river?', options: ['Narmada', 'Brahmaputra', 'Hugli', 'Kaveri'], correctAnswer: 1 },
-            { id: 167, subject: 'GS', text: 'Keoladev national park is situated in which state of India?', options: ['MP', 'Rajasthan', 'West Bengal', 'Odisha'], correctAnswer: 1 }, // Bharatpur, Rajasthan
-            { id: 168, subject: 'GS', text: 'Iron ore is an important ore for?', options: ['Aluminium', 'Steel', 'Copper', 'Zinc'], correctAnswer: 1 },
-            { id: 169, subject: 'GS', text: 'The Indian constitution was adopted and enacted by the constituent assembly of India on?', options: ['9 Dec 1946', '15 Aug. 1957', '26 Nov 1949', '26 Jan 1950'], correctAnswer: 2 }, // Adopted on 26 Nov 1949, came into force 26 Jan 1950.
-            { id: 170, subject: 'GS', text: 'Which city in India is called as "garden city"?', options: ['Jaipur', 'Bengaluru', 'Jabalpur', 'Ladakh'], correctAnswer: 1 },
-
-            // --- APTITUDE (171-190) ---
-            { id: 171, subject: 'Aptitude', text: 'Spot the stranger:', options: ['Delight', 'Happiness', 'Joy', 'Sorrow'], correctAnswer: 3 }, // Sorrow is negative.
-            { id: 172, subject: 'Aptitude', text: 'Choose the pair where the items... do not bear the same relationship... Book and Author', options: ['Song and Actor', 'Painting and artist', 'Chef and Dish', 'Building and Architect'], correctAnswer: 0 }, // Author writes book, Artist paints, Chef makes dish. Actor performs song (usually).
-            { id: 173, subject: 'Aptitude', text: 'Choose the most appropriate word to fill in the blank: Read is to write as listen is to', options: ['Hear', 'Ignore', 'Understand', 'Speak'], correctAnswer: 3 }, // Input/Output pair. Read (in), Write (out). Listen (in), Speak (out).
-            { id: 174, subject: 'Aptitude', text: 'Choose the most appropriate word to fill in the blank: (Incomplete question)', options: ['Shiny', 'Light', 'Bright', 'Dim'], correctAnswer: 0 }, // Placeholder
-            { id: 175, subject: 'Aptitude', text: 'Continue the given series: 112, 223, 334, 445, ___', options: ['778', '667', '889', '556'], correctAnswer: 3 }, // n, n, n+1. 5, 5, 5+1 = 556.
-            { id: 176, subject: 'Aptitude', text: 'Write the next number in the series: 3, 6, 12, 24, ___', options: ['48', '36', '60', '72'], correctAnswer: 0 }, // x2
-            { id: 177, subject: 'Aptitude', text: 'Spot the stranger:', options: ['2', '9', '6', '4'], correctAnswer: 1 }, // 9 is odd. 9 is only perfect square > 4.
-            { id: 178, subject: 'Aptitude', text: 'Choose the pair where the items... do not bear the same relationship...', options: ['Airplane and Pilot', 'Train and Conductor', 'Ship and Captain', 'Ship and Chief Officer'], correctAnswer: 3 }, // Pilot, Conductor, Captain are in charge. Chief Officer is 2nd.
-            { id: 179, subject: 'Aptitude', text: 'Teacher is to ___ (Incomplete question)', options: ['Kitchen', 'Food', 'Plate', 'Cup'], correctAnswer: 0 }, // Placeholder
-            { id: 180, subject: 'Aptitude', text: '___ (Incomplete question, probably spot the stranger)', options: ['Carrot', 'Mango', 'Apple', 'Grapes'], correctAnswer: 0 }, // Carrot is vegetable.
-            { id: 181, subject: 'Aptitude', text: 'If 23 = 618, 45 = 2030, 36 = 1836 then 57 = ?', options: ['3549', '3042', '3575', '3035'], correctAnswer: 0 }, // Logic: (a*b), (b*6) -> (3*6=18), (5*6=30), (6*6=36). -> (5*7=35), (7*6=42). -> 3542. This is not an option.
-            { id: 182, subject: 'Aptitude', text: 'Spot the Stranger', options: ['Warm', 'Cold', 'Hot', 'Windy'], correctAnswer: 3 }, // Windy is air movement, others are temperature.
-            { id: 183, subject: 'Aptitude', text: 'Spot the stranger', options: ['16', '25', '37', '49'], correctAnswer: 2 }, // 37 is not a perfect square.
-            { id: 184, subject: 'Aptitude', text: 'If HELLO is coded as IFMMP, what is the code for WORLD', options: ['XPSMS', 'XPDMD', 'XPSMD', 'XPSME'], correctAnswer: 3 }, // +1 for each letter. W+1=X, O+1=P, R+1=S, L+1=M, D+1=E.
-            { id: 185, subject: 'Aptitude', text: 'If ZEBRA is coded AEBRZ, then LION is coded as', options: ['NOIR', 'NLIO', 'ORIM', 'MLOI'], correctAnswer: 1 }, // Swap first and last letters. LION -> N I O L -> NLIO.
-            { id: 186, subject: 'Aptitude', text: 'Choose the response that will continue given series 123, 234, 345,............', options: ['567', '789', '678', '456'], correctAnswer: 3 },
-            { id: 187, subject: 'Aptitude', text: 'If CAT is coded as DBU, what is the code of DOG', options: ['EPT', 'EPH', 'EPJ', 'EPI'], correctAnswer: 1 }, // +1 for each letter. D+1=E, O+1=P, G+1=H.
-            { id: 188, subject: 'Aptitude', text: 'In 100 m Race, A covers the distance in 36 sec, B in 45 sec, In this race A beats B by', options: ['25 m', '20 m', '30 m', '35 m'], correctAnswer: 1 }, // When A finishes (36s), B has run (100/45)*36 = 80m. A wins by 20m.
-            { id: 189, subject: 'Aptitude', text: 'Choose the pair- Pen and Paper', options: ['Pencil and Eraser', 'Keyboard and CPU', 'Brush and Canvas', 'Keyboard and Monitor'], correctAnswer: 2 }, // Tool and the surface it's used on.
-            { id: 190, subject: 'Aptitude', text: 'Write the next 2,4,6,8,10, ___', options: ['12', '14', '16', '18'], correctAnswer: 0 }
-        ];
-
-        let timerInterval;
-        let testSubmitted = false;
-        let timeRemaining = 3 * 60 * 60; // 3 hours in seconds
-
-        // --- DOM Elements ---
-        const questionsContainer = document.getElementById('questions-container');
-        const timerDisplay = document.getElementById('timer');
-        const modal = document.getElementById('results-modal');
-        const scoreCountEl = document.getElementById('score-count');
-        const submitBtn = document.getElementById('submit-btn');
-        const confirmModal = document.getElementById('confirm-modal');
-
-        // --- Functions ---
-
-        /**
-         * Formats time in seconds to HH:MM:SS
-         */
-        function formatTime(seconds) {
-            const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
-            const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
-            const s = (seconds % 60).toString().padStart(2, '0');
-            return `${h}:${m}:${s}`;
-        }
-
-        /**
-         * Starts the countdown timer
-         */
-        function startTimer() {
-            timerDisplay.textContent = formatTime(timeRemaining);
-            timerInterval = setInterval(() => {
-                timeRemaining--;
-                timerDisplay.textContent = formatTime(timeRemaining);
-
-                if (timeRemaining <= 0) {
-                    clearInterval(timerInterval);
-                    timerDisplay.textContent = "00:00:00";
-                    timerDisplay.classList.add('text-red-600');
-                    performSubmit(); // Auto-submit when time is up
+        const IMUCETMockTest = () => {
+            // --- Data: 200 Questions from the provided JSON ---
+            const questions = useMemo(() => [
+                {
+                "questionNumber": 1,
+                "section": "English",
+                "question": "Complete the sentences with suitable alternatives.\nIf I ___ choose between the two options, I would choose the first one.",
+                "answerOptions": [
+                    {"text": "were to", "isCorrect": true},
+                    {"text": "might", "isCorrect": false},
+                    {"text": "had to", "isCorrect": false},
+                    {"text": "should", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 2,
+                "section": "English",
+                "question": "Choose the word nearest in meaning to the underlined word.\nOur professor's lecture was quite **verbose**.",
+                "answerOptions": [
+                    {"text": "concise", "isCorrect": false},
+                    {"text": "brief", "isCorrect": false},
+                    {"text": "lengthy", "isCorrect": true},
+                    {"text": "longish", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 3,
+                "section": "English",
+                "question": "Complete the sentences with suitable alternatives.\nBy next year, I ___ Chinese for five years.",
+                "answerOptions": [
+                    {"text": "study", "isCorrect": false},
+                    {"text": "have been studying", "isCorrect": false},
+                    {"text": "will have been studying", "isCorrect": true},
+                    {"text": "am studying", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 4,
+                "section": "English",
+                "question": "Choose the word nearest in meaning to the underlined word.\nToday the politician's speech was full of **rhetoric**.",
+                "answerOptions": [
+                    {"text": "persuasive language", "isCorrect": true},
+                    {"text": "incoherent", "isCorrect": false},
+                    {"text": "figurative language", "isCorrect": false},
+                    {"text": "factual language", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 5,
+                "section": "English",
+                "question": "The detective had ___ for solving complex cases.",
+                "answerOptions": [
+                    {"text": "an inclination", "isCorrect": false},
+                    {"text": "a talent", "isCorrect": false},
+                    {"text": "an instinct", "isCorrect": true},
+                    {"text": "an aptitude", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 6,
+                "section": "English",
+                "question": "Choose the word nearest in meaning to the underlined word.\nThe **serendipitous** discovery led to a breakthrough.",
+                "answerOptions": [
+                    {"text": "intentional", "isCorrect": false},
+                    {"text": "deliberate", "isCorrect": false},
+                    {"text": "accidental", "isCorrect": true},
+                    {"text": "planned", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 7,
+                "section": "English",
+                "question": "Choose the word closest to the **opposite** in meaning.\nThe researcher's **assertion** that climate change is irreversible has sparked intense debate.",
+                "answerOptions": [
+                    {"text": "concession", "isCorrect": false},
+                    {"text": "denial", "isCorrect": true},
+                    {"text": "hypothesis", "isCorrect": false},
+                    {"text": "claim", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 8,
+                "section": "English",
+                "question": "Choose the word closest to the **opposite** in meaning.\nThe instructions were **vague**, making it difficult to assemble the furniture.",
+                "answerOptions": [
+                    {"text": "incomplete", "isCorrect": false},
+                    {"text": "clear", "isCorrect": true},
+                    {"text": "confusing", "isCorrect": false},
+                    {"text": "ambiguous", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 9,
+                "section": "English",
+                "question": "Choose the word closest to the **opposite** in meaning.\nThe artist's use of colour was **subdued** creating a happy mood.",
+                "answerOptions": [
+                    {"text": "restless", "isCorrect": false},
+                    {"text": "expressive", "isCorrect": false},
+                    {"text": "muted", "isCorrect": false},
+                    {"text": "vibrant", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 10,
+                "section": "English",
+                "question": "Choose the word nearest in meaning to the underlined word.\nThe artist's work was considered **eccentric**.",
+                "answerOptions": [
+                    {"text": "conventional", "isCorrect": false},
+                    {"text": "common", "isCorrect": false},
+                    {"text": "typical", "isCorrect": false},
+                    {"text": "unusual", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 11,
+                "section": "English",
+                "question": "Change Voice: The play was written by John Donne.",
+                "answerOptions": [
+                    {"text": "The play has been written by John Donne", "isCorrect": false},
+                    {"text": "John Donne is writing the play.", "isCorrect": false},
+                    {"text": "The play is written by John Donne.", "isCorrect": false},
+                    {"text": "John Donne wrote the play.", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 12,
+                "section": "English",
+                "question": "By the time I arrived, they ___ their project.",
+                "answerOptions": [
+                    {"text": "had finished", "isCorrect": true},
+                    {"text": "have finished", "isCorrect": false},
+                    {"text": "finish", "isCorrect": false},
+                    {"text": "were finishing", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 13,
+                "section": "English",
+                "question": "Change Voice: The professor grades the papers.",
+                "answerOptions": [
+                    {"text": "The papers have been graded.", "isCorrect": false},
+                    {"text": "The papers are graded by the professor.", "isCorrect": true},
+                    {"text": "The papers is being graded by the professor.", "isCorrect": false},
+                    {"text": "The professor is grading the papers.", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 14,
+                "section": "English",
+                "question": "If it ___ tomorrow, we will stay indoors.",
+                "answerOptions": [
+                    {"text": "would rain", "isCorrect": false},
+                    {"text": "rains", "isCorrect": true},
+                    {"text": "should rains", "isCorrect": false},
+                    {"text": "will rain", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 15,
+                "section": "English",
+                "question": "They ___ taken the earlier flight, but they missed it.",
+                "answerOptions": [
+                    {"text": "would have", "isCorrect": false},
+                    {"text": "should have", "isCorrect": true},
+                    {"text": "could have", "isCorrect": false},
+                    {"text": "must have", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 16,
+                "section": "English",
+                "question": "Choose the word closest to the **opposite** in meaning.\nThe **preamble** to the constitution outlines the fundamental principles.",
+                "answerOptions": [
+                    {"text": "article", "isCorrect": false},
+                    {"text": "conclusion", "isCorrect": true},
+                    {"text": "amendment", "isCorrect": false},
+                    {"text": "introduction", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 17,
+                "section": "English",
+                "question": "By the time I arrived, they ___ finished their project.",
+                "answerOptions": [
+                    {"text": "would have", "isCorrect": false},
+                    {"text": "should have", "isCorrect": false},
+                    {"text": "must have", "isCorrect": true},
+                    {"text": "ought to have", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 18,
+                "section": "English",
+                "question": "Choose the word closest to the **opposite** in meaning.\nThe tech company's product was at the **cutting edge** of industry trends.",
+                "answerOptions": [
+                    {"text": "behind the times", "isCorrect": true},
+                    {"text": "obsolete", "isCorrect": false},
+                    {"text": "traditional", "isCorrect": false},
+                    {"text": "state of the art", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 19,
+                "section": "English",
+                "question": "Choose the word closest to the **opposite** in meaning.\nThe billionaire's **grandiose** plans for a luxury skyscraper were met with skepticism by city officials.",
+                "answerOptions": [
+                    {"text": "ambitious", "isCorrect": false},
+                    {"text": "lavish", "isCorrect": false},
+                    {"text": "extravagant", "isCorrect": false},
+                    {"text": "modest", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 20,
+                "section": "English",
+                "question": "Change Voice: The chef cooks the meal.",
+                "answerOptions": [
+                    {"text": "The chef is cooking the meal.", "isCorrect": false},
+                    {"text": "The meal cooks by the chef.", "isCorrect": false},
+                    {"text": "The meal is cooked by the chef.", "isCorrect": true},
+                    {"text": "The meal is being cooked by the chef.", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 21,
+                "section": "English",
+                "question": "Change Voice: The new policy was implemented by the management.",
+                "answerOptions": [
+                    {"text": "The management implemented the new policy.", "isCorrect": true},
+                    {"text": "The new policy has been implemented.", "isCorrect": false},
+                    {"text": "The management is implementing the new policy.", "isCorrect": false},
+                    {"text": "The new policy is being implemented by the management.", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 22,
+                "section": "English",
+                "question": "Substitute one word: A group of three novels or plays with a common theme.",
+                "answerOptions": [
+                    {"text": "Anthology", "isCorrect": false},
+                    {"text": "Chronicle", "isCorrect": false},
+                    {"text": "Series", "isCorrect": false},
+                    {"text": "Trilogy", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 23,
+                "section": "English",
+                "question": "If I ___ the solution, I would tell you.",
+                "answerOptions": [
+                    {"text": "knew", "isCorrect": true},
+                    {"text": "know", "isCorrect": false},
+                    {"text": "have known", "isCorrect": false},
+                    {"text": "had known", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 24,
+                "section": "English",
+                "question": "After the long hike, we were all feeling quite ___ and needed a rest.",
+                "answerOptions": [
+                    {"text": "depleted", "isCorrect": false},
+                    {"text": "exhausted", "isCorrect": true},
+                    {"text": "drained", "isCorrect": false},
+                    {"text": "fatigued", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 25,
+                "section": "English",
+                "question": "The team's performance was so ___ that they were awarded the championship.",
+                "answerOptions": [
+                    {"text": "exceptional", "isCorrect": true},
+                    {"text": "commendable", "isCorrect": false},
+                    {"text": "outstanding", "isCorrect": false},
+                    {"text": "competent", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 26,
+                "section": "English",
+                "question": "Substitute one word: A statement that is seemingly contradictory but may be true.",
+                "answerOptions": [
+                    {"text": "Epigram", "isCorrect": false},
+                    {"text": "Hyperbole", "isCorrect": false},
+                    {"text": "Oxymoron", "isCorrect": false},
+                    {"text": "Paradox", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 27,
+                "section": "English",
+                "question": "Substitute one word: A person who is talkative.",
+                "answerOptions": [
+                    {"text": "Chatty", "isCorrect": false},
+                    {"text": "Taciturn", "isCorrect": false},
+                    {"text": "Loquacious", "isCorrect": true},
+                    {"text": "Reticent", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 28,
+                "section": "English",
+                "question": "Change Voice: The company has hired new employees.",
+                "answerOptions": [
+                    {"text": "New employees are being hired.", "isCorrect": false},
+                    {"text": "The company is hiring new employees.", "isCorrect": false},
+                    {"text": "New employees have been hired by the company.", "isCorrect": true},
+                    {"text": "New employees are hired by the company.", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 29,
+                "section": "English",
+                "question": "Choose the word nearest in meaning: She was **fastidious** about her work and never compromised on the quality.",
+                "answerOptions": [
+                    {"text": "painstaking", "isCorrect": true},
+                    {"text": "careless", "isCorrect": false},
+                    {"text": "lazy", "isCorrect": false},
+                    {"text": "indifferent", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 30,
+                "section": "English",
+                "question": "Substitute one word: A person who composes or writes a dictionary.",
+                "answerOptions": [
+                    {"text": "Calligrapher", "isCorrect": false},
+                    {"text": "Cartographer", "isCorrect": false},
+                    {"text": "Lexicographer", "isCorrect": true},
+                    {"text": "Stenographer", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 31,
+                "section": "English",
+                "question": "Choose the word closest to the **opposite** in meaning.\nThe visible signs of wear and tear on the building needed repair.",
+                "answerOptions": [
+                    {"text": "concealed", "isCorrect": true},
+                    {"text": "noticeable", "isCorrect": false},
+                    {"text": "unnoticeable", "isCorrect": false},
+                    {"text": "obvious", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 32,
+                "section": "English",
+                "question": "Substitute one word: A book published after the death of the author.",
+                "answerOptions": [
+                    {"text": "Manuscript", "isCorrect": false},
+                    {"text": "Posthumous", "isCorrect": true},
+                    {"text": "Premortem", "isCorrect": false},
+                    {"text": "Post-mortem", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 33,
+                "section": "English",
+                "question": "I ___ in Dublin for three years now.",
+                "answerOptions": [
+                    {"text": "am living", "isCorrect": false},
+                    {"text": "living", "isCorrect": false},
+                    {"text": "have been living", "isCorrect": true},
+                    {"text": "lived", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 34,
+                "section": "English",
+                "question": "Choose the word nearest in meaning: The **inadvertent** mistake led to a huge loss.",
+                "answerOptions": [
+                    {"text": "miscalculated", "isCorrect": false},
+                    {"text": "unintentional", "isCorrect": true},
+                    {"text": "predictable", "isCorrect": false},
+                    {"text": "intentional", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 35,
+                "section": "English",
+                "question": "The old house was filled with ___ furniture and dusty artifacts.",
+                "answerOptions": [
+                    {"text": "contemporary", "isCorrect": false},
+                    {"text": "archaic", "isCorrect": false},
+                    {"text": "antique", "isCorrect": true},
+                    {"text": "historical", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 36,
+                "section": "English",
+                "question": "She ___ have gone to the party, because I didn't see her there.",
+                "answerOptions": [
+                    {"text": "can't", "isCorrect": true},
+                    {"text": "might not", "isCorrect": false},
+                    {"text": "shouldn't", "isCorrect": false},
+                    {"text": "wouldn't", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 37,
+                "section": "English",
+                "question": "The scientist's ___ research led to a breakthrough in medicine.",
+                "answerOptions": [
+                    {"text": "systematic", "isCorrect": false},
+                    {"text": "meticulous", "isCorrect": true},
+                    {"text": "haphazard", "isCorrect": false},
+                    {"text": "arbitrary", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 38,
+                "section": "English",
+                "question": "The politician made an ___ speech that left the audience speechless.",
+                "answerOptions": [
+                    {"text": "articulate", "isCorrect": false},
+                    {"text": "impactful", "isCorrect": false},
+                    {"text": "elaborate", "isCorrect": false},
+                    {"text": "eloquent", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 39,
+                "section": "English",
+                "question": "Choose the word nearest in meaning: The company's profits began to **dwindle**.",
+                "answerOptions": [
+                    {"text": "diminish", "isCorrect": true},
+                    {"text": "stabilize", "isCorrect": false},
+                    {"text": "increase", "isCorrect": false},
+                    {"text": "fluctuate", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 40,
+                "section": "English",
+                "question": "Substitute one word: One who studies the evolution of mankind.",
+                "answerOptions": [
+                    {"text": "Anthropologist", "isCorrect": true},
+                    {"text": "Geologist", "isCorrect": false},
+                    {"text": "Sociologist", "isCorrect": false},
+                    {"text": "Archaeologist", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 41,
+                "section": "General Awareness",
+                "question": "Deepest Port in India?",
+                "answerOptions": [
+                    {"text": "INPT", "isCorrect": false},
+                    {"text": "Kochi Port", "isCorrect": false},
+                    {"text": "Kandla Port", "isCorrect": false},
+                    {"text": "Gangavaram Port", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 42,
+                "section": "General Awareness",
+                "question": "Spot the Stranger",
+                "answerOptions": [
+                    {"text": "Joy", "isCorrect": false},
+                    {"text": "Happiness", "isCorrect": false},
+                    {"text": "Sorrow", "isCorrect": true},
+                    {"text": "Delight", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 43,
+                "section": "General Awareness",
+                "question": "The oldest port in India is",
+                "answerOptions": [
+                    {"text": "Visakhapatnam", "isCorrect": false},
+                    {"text": "Chennai", "isCorrect": false},
+                    {"text": "Kolkata", "isCorrect": true},
+                    {"text": "Lothal", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 44,
+                "section": "General Awareness",
+                "question": "Surat is situated on the banks of which river?",
+                "answerOptions": [
+                    {"text": "Tapi", "isCorrect": true},
+                    {"text": "Ganges", "isCorrect": false},
+                    {"text": "Yamuna", "isCorrect": false},
+                    {"text": "Godavari", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 45,
+                "section": "General Awareness",
+                "question": "In 100 m race, A covers the distance in 36 seconds and B in 45 seconds. In this race A beats B by:",
+                "answerOptions": [
+                    {"text": "35m", "isCorrect": false},
+                    {"text": "30m", "isCorrect": false},
+                    {"text": "25m", "isCorrect": false},
+                    {"text": "20m", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 46,
+                "section": "General Awareness",
+                "question": "Which state in India has the least literacy rate?",
+                "answerOptions": [
+                    {"text": "Bihar", "isCorrect": true},
+                    {"text": "Andhra Pradesh", "isCorrect": false},
+                    {"text": "Kerala", "isCorrect": false},
+                    {"text": "West Bengal", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 47,
+                "section": "General Awareness",
+                "question": "If 23 = 618, 45 = 2030, 36 = 1836 then 57 = ?",
+                "answerOptions": [
+                    {"text": "3035", "isCorrect": false},
+                    {"text": "3042", "isCorrect": false},
+                    {"text": "3575", "isCorrect": true},
+                    {"text": "3549", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 48,
+                "section": "General Awareness",
+                "question": "Choose the pair which does not bear the same relationship as: Car and Driver",
+                "answerOptions": [
+                    {"text": "Ship and Captain", "isCorrect": false},
+                    {"text": "Ship and Chief Officer", "isCorrect": true},
+                    {"text": "Airplane and Pilot", "isCorrect": false},
+                    {"text": "Train and Conductor", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 49,
+                "section": "General Awareness",
+                "question": "Which state is known as the \"Rice Bowl of India\"?",
+                "answerOptions": [
+                    {"text": "Madhya Pradesh", "isCorrect": false},
+                    {"text": "Punjab", "isCorrect": false},
+                    {"text": "Haryana", "isCorrect": false},
+                    {"text": "Andhra Pradesh", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 50,
+                "section": "General Awareness",
+                "question": "The Digboi oil refinery in India is located at",
+                "answerOptions": [
+                    {"text": "H.P", "isCorrect": false},
+                    {"text": "U.P", "isCorrect": false},
+                    {"text": "A.P", "isCorrect": false},
+                    {"text": "Assam", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 51,
+                "section": "General Awareness",
+                "question": "Write the next number in the series: 3, 6, 12, 24, ...",
+                "answerOptions": [
+                    {"text": "72", "isCorrect": false},
+                    {"text": "60", "isCorrect": false},
+                    {"text": "48", "isCorrect": true},
+                    {"text": "36", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 52,
+                "section": "General Awareness",
+                "question": "If \"CAT\" is coded as \"DBU\", what is the code for \"DOG\"?",
+                "answerOptions": [
+                    {"text": "EPJ", "isCorrect": false},
+                    {"text": "EPH", "isCorrect": true},
+                    {"text": "EPI", "isCorrect": false},
+                    {"text": "EPT", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 53,
+                "section": "General Awareness",
+                "question": "Write the next number in the series: 2, 4, 6, 8, 10, ...",
+                "answerOptions": [
+                    {"text": "18", "isCorrect": false},
+                    {"text": "14", "isCorrect": false},
+                    {"text": "12", "isCorrect": true},
+                    {"text": "16", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 54,
+                "section": "General Awareness",
+                "question": "If \"HELLO\" is coded as \"IFMMP\", what is the code for \"WORLD\"?",
+                "answerOptions": [
+                    {"text": "XPSMS", "isCorrect": false},
+                    {"text": "XPSMD", "isCorrect": false},
+                    {"text": "XPDMD", "isCorrect": false},
+                    {"text": "XPSME", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 55,
+                "section": "General Awareness",
+                "question": "Read is to write as listen is to",
+                "answerOptions": [
+                    {"text": "Speak", "isCorrect": true},
+                    {"text": "Ignore", "isCorrect": false},
+                    {"text": "Understand", "isCorrect": false},
+                    {"text": "Hear", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 56,
+                "section": "General Awareness",
+                "question": "Ghoomar is a famous dance form of",
+                "answerOptions": [
+                    {"text": "Rajasthan", "isCorrect": true},
+                    {"text": "Karnataka", "isCorrect": false},
+                    {"text": "Andhra Pradesh", "isCorrect": false},
+                    {"text": "Uttar Pradesh", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 57,
+                "section": "General Awareness",
+                "question": "Which state is known as the \"Land of Five Rivers\"?",
+                "answerOptions": [
+                    {"text": "Punjab", "isCorrect": true},
+                    {"text": "Kerala", "isCorrect": false},
+                    {"text": "Maharashtra", "isCorrect": false},
+                    {"text": "Haryana", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 58,
+                "section": "General Awareness",
+                "question": "Spot the Stranger",
+                "answerOptions": [
+                    {"text": "37", "isCorrect": true},
+                    {"text": "49", "isCorrect": false},
+                    {"text": "25", "isCorrect": false},
+                    {"text": "16", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 59,
+                "section": "General Awareness",
+                "question": "In which state is the famous Keoladeo National Park located?",
+                "answerOptions": [
+                    {"text": "Rajasthan", "isCorrect": true},
+                    {"text": "Madhya Pradesh", "isCorrect": false},
+                    {"text": "West Bengal", "isCorrect": false},
+                    {"text": "Orissa", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 60,
+                "section": "General Awareness",
+                "question": "National Institute of Oceanography is headquartered at",
+                "answerOptions": [
+                    {"text": "Goa", "isCorrect": true},
+                    {"text": "New Delhi", "isCorrect": false},
+                    {"text": "Mumbai", "isCorrect": false},
+                    {"text": "Hyderabad", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 61,
+                "section": "General Awareness",
+                "question": "Which Country has no River?",
+                "answerOptions": [
+                    {"text": "Norway", "isCorrect": false},
+                    {"text": "Indonesia", "isCorrect": false},
+                    {"text": "Nepal", "isCorrect": false},
+                    {"text": "Saudi Arabia", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 62,
+                "section": "General Awareness",
+                "question": "Iron ore is an important ore for",
+                "answerOptions": [
+                    {"text": "Steel", "isCorrect": true},
+                    {"text": "Aluminium", "isCorrect": false},
+                    {"text": "Copper", "isCorrect": false},
+                    {"text": "Zinc", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 63,
+                "section": "General Awareness",
+                "question": "Choose the pair which does not bear the same relationship as: Pen and Paper",
+                "answerOptions": [
+                    {"text": "Keyboard and Monitor", "isCorrect": false},
+                    {"text": "Pencil and Eraser", "isCorrect": false},
+                    {"text": "Brush and Canvas", "isCorrect": false},
+                    {"text": "Keyboard and CPU", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 64,
+                "section": "General Awareness",
+                "question": "Spot the Stranger",
+                "answerOptions": [
+                    {"text": "Carrot", "isCorrect": true},
+                    {"text": "Banana", "isCorrect": false},
+                    {"text": "Mango", "isCorrect": false},
+                    {"text": "Apple", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 65,
+                "section": "General Awareness",
+                "question": "Choose the pair which does not bear the same relationship as: Book and Author",
+                "answerOptions": [
+                    {"text": "Song and Actor", "isCorrect": true},
+                    {"text": "Chef and Dish", "isCorrect": false},
+                    {"text": "Building and Architect", "isCorrect": false},
+                    {"text": "Painting and Artist", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 66,
+                "section": "General Awareness",
+                "question": "Which city in India is known as \"Garden City\"?",
+                "answerOptions": [
+                    {"text": "Bengaluru", "isCorrect": true},
+                    {"text": "Jabalpur", "isCorrect": false},
+                    {"text": "Ladakh", "isCorrect": false},
+                    {"text": "Jaipur", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 67,
+                "section": "General Awareness",
+                "question": "Koyana multipurpose project is on which State?",
+                "answerOptions": [
+                    {"text": "U.P", "isCorrect": false},
+                    {"text": "Assam", "isCorrect": false},
+                    {"text": "Nagaland", "isCorrect": false},
+                    {"text": "Maharashtra", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 68,
+                "section": "General Awareness",
+                "question": "Teacher is to classroom as chef is to",
+                "answerOptions": [
+                    {"text": "Plate", "isCorrect": false},
+                    {"text": "Food", "isCorrect": false},
+                    {"text": "Recipe", "isCorrect": false},
+                    {"text": "Kitchen", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 69,
+                "section": "General Awareness",
+                "question": "Arrange the following planets in ascending order of their distance from the Sun: I. Jupiter II. Venus III. Mercury IV. Mars V. Earth",
+                "answerOptions": [
+                    {"text": "III, II, V, IV, I", "isCorrect": true},
+                    {"text": "I, V, IV, II, III", "isCorrect": false},
+                    {"text": "III, II, IV, V, I", "isCorrect": false},
+                    {"text": "I, IV, V, II, III", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 70,
+                "section": "General Awareness",
+                "question": "If \"ZEBRA\" is coded as \"AEBRZ\", what is the code for \"LION\"?",
+                "answerOptions": [
+                    {"text": "NOIR", "isCorrect": false},
+                    {"text": "NLIO", "isCorrect": false},
+                    {"text": "ORIM", "isCorrect": false},
+                    {"text": "MLOI", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 71,
+                "section": "General Awareness",
+                "question": "Spot the Stranger",
+                "answerOptions": [
+                    {"text": "4", "isCorrect": false},
+                    {"text": "6", "isCorrect": true},
+                    {"text": "9", "isCorrect": false},
+                    {"text": "2", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 72,
+                "section": "General Awareness",
+                "question": "Which is the Southernmost Port in India?",
+                "answerOptions": [
+                    {"text": "Vizag Port", "isCorrect": false},
+                    {"text": "Kochi Port", "isCorrect": false},
+                    {"text": "Tuticorin Port", "isCorrect": true},
+                    {"text": "Chennai", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 73,
+                "section": "General Awareness",
+                "question": "Which is the planet nearest to the Sun?",
+                "answerOptions": [
+                    {"text": "Mars", "isCorrect": false},
+                    {"text": "Earth", "isCorrect": false},
+                    {"text": "Mercury", "isCorrect": true},
+                    {"text": "Saturn", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 74,
+                "section": "General Awareness",
+                "question": "Which of the following is a Union Territory?",
+                "answerOptions": [
+                    {"text": "Tamil Nadu", "isCorrect": false},
+                    {"text": "Mizoram", "isCorrect": false},
+                    {"text": "Nagaland", "isCorrect": false},
+                    {"text": "Lakshadweep", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 75,
+                "section": "General Awareness",
+                "question": "Guwahati is situated on the bank of which river?",
+                "answerOptions": [
+                    {"text": "Hooghly", "isCorrect": false},
+                    {"text": "Narmada", "isCorrect": false},
+                    {"text": "Brahmaputra", "isCorrect": true},
+                    {"text": "Kaveri", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 76,
+                "section": "General Awareness",
+                "question": "Spot the Stranger",
+                "answerOptions": [
+                    {"text": "Hot", "isCorrect": false},
+                    {"text": "Cold", "isCorrect": false},
+                    {"text": "Warm", "isCorrect": false},
+                    {"text": "Windy", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 77,
+                "section": "General Awareness",
+                "question": "Fast is to slow as ___ is to dark",
+                "answerOptions": [
+                    {"text": "Dim", "isCorrect": false},
+                    {"text": "Bright", "isCorrect": true},
+                    {"text": "Shiny", "isCorrect": false},
+                    {"text": "Light", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 78,
+                "section": "General Awareness",
+                "question": "Continue the series: 123, 234, 345, ...",
+                "answerOptions": [
+                    {"text": "456", "isCorrect": true},
+                    {"text": "789", "isCorrect": false},
+                    {"text": "678", "isCorrect": false},
+                    {"text": "567", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 79,
+                "section": "General Awareness",
+                "question": "The Indian Constitution was adopted and enacted by the Constituent Assembly on",
+                "answerOptions": [
+                    {"text": "26th November 1949", "isCorrect": true},
+                    {"text": "26th January 1950", "isCorrect": false},
+                    {"text": "9th December 1946", "isCorrect": false},
+                    {"text": "15th August 1947", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 80,
+                "section": "General Awareness",
+                "question": "Continue the series: 112, 223, 334, 445, ...",
+                "answerOptions": [
+                    {"text": "556", "isCorrect": true},
+                    {"text": "667", "isCorrect": false},
+                    {"text": "778", "isCorrect": false},
+                    {"text": "889", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 81,
+                "section": "Mathematics",
+                "question": "The number of ways in which 8 examination papers be arranged so that the best and worst papers never come together is",
+                "answerOptions": [
+                    {"text": "8!", "isCorrect": false},
+                    {"text": "None", "isCorrect": false},
+                    {"text": "8! - 7!", "isCorrect": false},
+                    {"text": "8! - 2 x 7!", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 82,
+                "section": "Mathematics",
+                "question": "The number of unit vectors perpendicular to the vectors r = 2i + j + 2k and s = j + k is",
+                "answerOptions": [
+                    {"text": "one", "isCorrect": false},
+                    {"text": "two", "isCorrect": true},
+                    {"text": "three", "isCorrect": false},
+                    {"text": "infinite", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 83,
+                "section": "Mathematics",
+                "question": "If A is a square matrix of order 3 such that A(adjA) = 10 I, then |adj A| is equal to",
+                "answerOptions": [
+                    {"text": "10 I", "isCorrect": false},
+                    {"text": "10", "isCorrect": false},
+                    {"text": "1", "isCorrect": false},
+                    {"text": "100", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 84,
+                "section": "Mathematics",
+                "question": "The absolute maximum value of the function f(x) = 4x - (1/2)x^2 in the interval [-2, 9/2] is",
+                "answerOptions": [
+                    {"text": "9", "isCorrect": false},
+                    {"text": "10", "isCorrect": false},
+                    {"text": "6", "isCorrect": false},
+                    {"text": "8", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 85,
+                "section": "Mathematics",
+                "question": "The radius of a cylinder is increasing at 3 cm/sec and height decreasing at 4 cm/sec. Rate of change of volume when r=4, h=6 is",
+                "answerOptions": [
+                    {"text": "80π cm³/sec", "isCorrect": true},
+                    {"text": "80 cm³/sec", "isCorrect": false},
+                    {"text": "144 cm³/sec", "isCorrect": false},
+                    {"text": "54 cm³/sec", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 86,
+                "section": "Mathematics",
+                "question": "If A and B are two events such that P(A)=0.6, P(B)=0.2 and P(A/B)=0.5, then P(A'/B') is equal to",
+                "answerOptions": [
+                    {"text": "3/10", "isCorrect": false},
+                    {"text": "1/10", "isCorrect": false},
+                    {"text": "6/7", "isCorrect": true},
+                    {"text": "3/8", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 87,
+                "section": "Mathematics",
+                "question": "The number of 4 digit numbers greater than 5,000 formed from 3,4,5,6,7 (No digit repeated) is",
+                "answerOptions": [
+                    {"text": "none of these", "isCorrect": false},
+                    {"text": "27", "isCorrect": false},
+                    {"text": "70", "isCorrect": false},
+                    {"text": "72", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 88,
+                "section": "Mathematics",
+                "question": "The order and degree of the differential equation of the family of curves given by y = Ax + A^3 are",
+                "answerOptions": [
+                    {"text": "1,3", "isCorrect": false},
+                    {"text": "2,3", "isCorrect": false},
+                    {"text": "1,2", "isCorrect": false},
+                    {"text": "2,4", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 89,
+                "section": "Mathematics",
+                "question": "The area in (sq. units) of the region bounded by the x-axis and y = sqrt(16 - x^2) is",
+                "answerOptions": [
+                    {"text": "256", "isCorrect": false},
+                    {"text": "8π", "isCorrect": true},
+                    {"text": "200", "isCorrect": false},
+                    {"text": "16π", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 90,
+                "section": "Mathematics",
+                "question": "The area bounded by y-axis, y=sin x, y=cos x, 0 <= x <= pi/2 is",
+                "answerOptions": [
+                    {"text": "sqrt(2) + 1", "isCorrect": false},
+                    {"text": "sqrt(2) - 1", "isCorrect": true},
+                    {"text": "sqrt(2)", "isCorrect": false},
+                    {"text": "(sqrt(2), -1)", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 91,
+                "section": "Mathematics",
+                "question": "If determinant of [[a,h,g],[h,b,f],[g,f,c]] = 0, then ax^2 + 2hxy + by^2 + 2gx + 2fy + c = 0 represents",
+                "answerOptions": [
+                    {"text": "Pair of Straight lines", "isCorrect": true},
+                    {"text": "Rectangular hyperbola", "isCorrect": false},
+                    {"text": "Parabola", "isCorrect": false},
+                    {"text": "An ellipse", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 92,
+                "section": "Mathematics",
+                "question": "The normal at the point (1,1) on the curve 2y + x^2 = 3 is",
+                "answerOptions": [
+                    {"text": "x - y = 0", "isCorrect": true},
+                    {"text": "x + y = 0", "isCorrect": false},
+                    {"text": "x + y + 1 = 0", "isCorrect": false},
+                    {"text": "x - y = 1", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 93,
+                "section": "Mathematics",
+                "question": "The function f(x) = x|x| at x=0 is",
+                "answerOptions": [
+                    {"text": "Neither continuous nor differentiable", "isCorrect": false},
+                    {"text": "Differentiable but not continuous", "isCorrect": false},
+                    {"text": "Continuous but not differentiable", "isCorrect": false},
+                    {"text": "Continuous and differentiable", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 94,
+                "section": "Mathematics",
+                "question": "If lines (x-1)/-3 = (y-2)/2k = (z-3)/2 and (x-1)/3k = (y-5)/1 = (6-z)/5 are mutually perpendicular, then k is",
+                "answerOptions": [
+                    {"text": "-10", "isCorrect": true},
+                    {"text": "10", "isCorrect": false},
+                    {"text": "7", "isCorrect": false},
+                    {"text": "-10/7", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 95,
+                "section": "Mathematics",
+                "question": "tan^-1(3) + tan^-1(alpha) = tan^-1((3+alpha)/(1-3alpha)) is valid for what value of alpha?",
+                "answerOptions": [
+                    {"text": "alpha in (-1/3, 1/3)", "isCorrect": false},
+                    {"text": "all real values", "isCorrect": false},
+                    {"text": "alpha < 1/3", "isCorrect": true},
+                    {"text": "alpha > 1/3", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 96,
+                "section": "Mathematics",
+                "question": "Integral from 0 to 1.5 of [x^2] dx is equal to",
+                "answerOptions": [
+                    {"text": "2(1.5 - sqrt(2))", "isCorrect": false},
+                    {"text": "2 - sqrt(2)", "isCorrect": true},
+                    {"text": "sqrt(2) - 1", "isCorrect": false},
+                    {"text": "2sqrt(2)", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 97,
+                "section": "Mathematics",
+                "question": "Differential of log [log (log x^2)] w.r.t x is",
+                "answerOptions": [
+                    {"text": "2", "isCorrect": false},
+                    {"text": "x log(x^2)log(log x^2)", "isCorrect": false},
+                    {"text": "2 / (x log(x^2)log(log x^2))", "isCorrect": true},
+                    {"text": "2x / log(log x^2)", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 98,
+                "section": "Mathematics",
+                "question": "If x = t^2 and y = t^3 then d^2y/dx^2 is equal to",
+                "answerOptions": [
+                    {"text": "3/2t", "isCorrect": false},
+                    {"text": "3/4t", "isCorrect": true},
+                    {"text": "3t/2", "isCorrect": false},
+                    {"text": "3/2", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 99,
+                "section": "Mathematics",
+                "question": "The solution of the differential equation dy/dx = (1+y^2)/(1+x^2) is",
+                "answerOptions": [
+                    {"text": "y = tan^-1 x + C", "isCorrect": false},
+                    {"text": "x = tan^-1 y + C", "isCorrect": false},
+                    {"text": "tan(xy) = C", "isCorrect": false},
+                    {"text": "y - x = C(1 + xy)", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 100,
+                "section": "Mathematics",
+                "question": "The number of arrangements of 10 different things taken 4 at a time in which one particular thing always occurs is",
+                "answerOptions": [
+                    {"text": "2014", "isCorrect": false},
+                    {"text": "2016", "isCorrect": true},
+                    {"text": "2015", "isCorrect": false},
+                    {"text": "none of these", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 101,
+                "section": "Mathematics",
+                "question": "Integral from 0 to pi/4 log(1+tan x) dx is",
+                "answerOptions": [
+                    {"text": "(pi/2) log 2", "isCorrect": false},
+                    {"text": "4pi log 2", "isCorrect": false},
+                    {"text": "pi log 2", "isCorrect": false},
+                    {"text": "(pi/8) log 2", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 102,
+                "section": "Mathematics",
+                "question": "Integral of x/(4+x^4) dx is equal to",
+                "answerOptions": [
+                    {"text": "(1/4) tan^-1(x^2/2) + c", "isCorrect": true},
+                    {"text": "(1/2) tan^-1(2x^2) + c", "isCorrect": false},
+                    {"text": "(1/4) tan^-1(x^2) + c", "isCorrect": false},
+                    {"text": "(1/2) tan^-1(x^2/2) + c", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 103,
+                "section": "Mathematics",
+                "question": "If integral from 0 to 1 of e^t/(1+t) dt = k, then integral 0 to 1 of e^t/(1+t)^2 dt is",
+                "answerOptions": [
+                    {"text": "k - 1 + e/2", "isCorrect": true},
+                    {"text": "k - 1 - e/2", "isCorrect": false},
+                    {"text": "k + 1 - e/2", "isCorrect": false},
+                    {"text": "k + 1 + e/2", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 104,
+                "section": "Mathematics",
+                "question": "In how many ways can 9 letters be posted in 4 letter boxes?",
+                "answerOptions": [
+                    {"text": "3024", "isCorrect": false},
+                    {"text": "4^5", "isCorrect": false},
+                    {"text": "126", "isCorrect": false},
+                    {"text": "4^9", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 105,
+                "section": "Mathematics",
+                "question": "Three numbers are chosen at random from 1 to 20. The probability that they are consecutive is",
+                "answerOptions": [
+                    {"text": "1/120", "isCorrect": false},
+                    {"text": "5/190", "isCorrect": false},
+                    {"text": "3/190", "isCorrect": true},
+                    {"text": "1/190", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 106,
+                "section": "Mathematics",
+                "question": "Integral of ((1-sin x)/(1-cos x))e^x dx is equal to",
+                "answerOptions": [
+                    {"text": "-1/2 e^x cot(x/2) + C", "isCorrect": false},
+                    {"text": "-e^x tan(x/2) + C", "isCorrect": false},
+                    {"text": "-e^x cot(x/2) + C", "isCorrect": true},
+                    {"text": "-1/2 e^x tan(x/2) + C", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 107,
+                "section": "Mathematics",
+                "question": "Y = f(X^2) and f'(x) = e^sqrt(x) then dy/dx is equal to",
+                "answerOptions": [
+                    {"text": "2xe^x", "isCorrect": true},
+                    {"text": "4x e^sqrt(x)", "isCorrect": false},
+                    {"text": "4xe^x", "isCorrect": false},
+                    {"text": "2x e^2sqrt(x)", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 108,
+                "section": "Mathematics",
+                "question": "The equation 2 cos^-1 x + sin^-1 x = 11pi/6 has",
+                "answerOptions": [
+                    {"text": "No solution", "isCorrect": true},
+                    {"text": "more than two solutions", "isCorrect": false},
+                    {"text": "two solutions", "isCorrect": false},
+                    {"text": "Unique solution", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 109,
+                "section": "Mathematics",
+                "question": "The point on the curve x^2 = 2y which is nearest to the point(0,2) is",
+                "answerOptions": [
+                    {"text": "(2sqrt(2), 0)", "isCorrect": false},
+                    {"text": "(2sqrt(2), 4)", "isCorrect": true},
+                    {"text": "(0,0)", "isCorrect": false},
+                    {"text": "(2,2)", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 110,
+                "section": "Mathematics",
+                "question": "A problem is given to 3 students A,B,C. Chances of solving are 1/2, 1/3, 1/4. Probability that problem is solved is",
+                "answerOptions": [
+                    {"text": "5/8", "isCorrect": false},
+                    {"text": "3/4", "isCorrect": true},
+                    {"text": "1/2", "isCorrect": false},
+                    {"text": "1/4", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 111,
+                "section": "Mathematics",
+                "question": "If A = [[-1,-2,-2],[2,1,-2],[2,-2,1]] then adj A is",
+                "answerOptions": [
+                    {"text": "A^t", "isCorrect": false},
+                    {"text": "3A^t", "isCorrect": true},
+                    {"text": "3A", "isCorrect": false},
+                    {"text": "A", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 112,
+                "section": "Mathematics",
+                "question": "If A = [[3,0,0],[0,3,0],[0,0,3]] then A^4 is",
+                "answerOptions": [
+                    {"text": "81A", "isCorrect": false},
+                    {"text": "27A", "isCorrect": true},
+                    {"text": "4A", "isCorrect": false},
+                    {"text": "12A", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 113,
+                "section": "Mathematics",
+                "question": "Three points P(2x, x+3), Q(0,x) and R(x+3, x+6) are collinear, then x is",
+                "answerOptions": [
+                    {"text": "2", "isCorrect": false},
+                    {"text": "0", "isCorrect": true},
+                    {"text": "3", "isCorrect": false},
+                    {"text": "1", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 114,
+                "section": "Mathematics",
+                "question": "If a line makes angles pi/3 and pi/4 with x-axis and y-axis, then acute angle with z-axis is",
+                "answerOptions": [
+                    {"text": "5pi/12", "isCorrect": false},
+                    {"text": "pi/4", "isCorrect": false},
+                    {"text": "pi/3", "isCorrect": true},
+                    {"text": "pi/6", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 115,
+                "section": "Mathematics",
+                "question": "If f:[2,inf) -> R is defined by f(x) = x^2 - 4x + 5, then range of f is",
+                "answerOptions": [
+                    {"text": "[1, inf)", "isCorrect": true},
+                    {"text": "[5, inf)", "isCorrect": false},
+                    {"text": "[4, inf)", "isCorrect": false},
+                    {"text": "R", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 116,
+                "section": "Mathematics",
+                "question": "If R is relation on A={1,2,3} given by {(1,1),(2,2),(3,3)}, then R is",
+                "answerOptions": [
+                    {"text": "Reflexive only", "isCorrect": false},
+                    {"text": "Symmetric only", "isCorrect": false},
+                    {"text": "Transitive only", "isCorrect": false},
+                    {"text": "Equivalence relation", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 117,
+                "section": "Mathematics",
+                "question": "If a, b, c are unit vectors such that a+b+c=0, then a.b + b.c + c.a is",
+                "answerOptions": [
+                    {"text": "3/2", "isCorrect": false},
+                    {"text": "-3/2", "isCorrect": true},
+                    {"text": "none", "isCorrect": false},
+                    {"text": "1", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 118,
+                "section": "Mathematics",
+                "question": "The distance of the point (a, b, c) from y-axis is",
+                "answerOptions": [
+                    {"text": "b", "isCorrect": false},
+                    {"text": "sqrt(a^2 + c^2)", "isCorrect": true},
+                    {"text": "|c| + |b|", "isCorrect": false},
+                    {"text": "|b|", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 119,
+                "section": "Mathematics",
+                "question": "If AB and BA both exist then",
+                "answerOptions": [
+                    {"text": "AB need not be equal to BA", "isCorrect": true},
+                    {"text": "AB equal to BA", "isCorrect": false},
+                    {"text": "A & B are singular", "isCorrect": false},
+                    {"text": "A & B are non singular", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 120,
+                "section": "Mathematics",
+                "question": "The area of triangle whose vertices are A(1,2,3), B(2,3,4) and C(-2,1,0) is",
+                "answerOptions": [
+                    {"text": "0", "isCorrect": true},
+                    {"text": "1", "isCorrect": false},
+                    {"text": "2", "isCorrect": false},
+                    {"text": "3", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 121,
+                "section": "Mathematics",
+                "question": "The principle value of tan^-1(tan(3pi/5)) is",
+                "answerOptions": [
+                    {"text": "3pi/5", "isCorrect": false},
+                    {"text": "2pi/5", "isCorrect": false},
+                    {"text": "-2pi/5", "isCorrect": true},
+                    {"text": "2pi/5", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 122,
+                "section": "Mathematics",
+                "question": "The reflection of the point (a, b, c) on xy-plane",
+                "answerOptions": [
+                    {"text": "(a, b, 0)", "isCorrect": false},
+                    {"text": "(a, b, c)", "isCorrect": false},
+                    {"text": "(0, 0, c)", "isCorrect": false},
+                    {"text": "(a, b, -c)", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 123,
+                "section": "Mathematics",
+                "question": "P(A)=0.4, P(A U B)=0.7, if A and B are mutually exclusive, then P(B) is",
+                "answerOptions": [
+                    {"text": "0.5", "isCorrect": false},
+                    {"text": "0.3", "isCorrect": true},
+                    {"text": "0.4", "isCorrect": false},
+                    {"text": "0.6", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 124,
+                "section": "Mathematics",
+                "question": "Solution of differential equation sqrt(1-x^2) dy + sqrt(1-y^2) dx = 0 is",
+                "answerOptions": [
+                    {"text": "sin^-1 x + sin^-1 y = C", "isCorrect": true},
+                    {"text": "x sin^-1 x = sqrt(1-x^2) + C", "isCorrect": false},
+                    {"text": "x sin^-1 x = sqrt(1-y^2) + C", "isCorrect": false},
+                    {"text": "x sqrt(1-y^2) = sin^-1 y + C", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 125,
+                "section": "Mathematics",
+                "question": "The function f(x) = tan x - x",
+                "answerOptions": [
+                    {"text": "Remains constant", "isCorrect": false},
+                    {"text": "Sometimes increases and sometimes decreases", "isCorrect": false},
+                    {"text": "Always decreases", "isCorrect": false},
+                    {"text": "Always increases", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 126,
+                "section": "Mathematics",
+                "question": "The maximum slope of the curve y = -x^3 + 3x^2 + 12x - 5 is",
+                "answerOptions": [
+                    {"text": "0", "isCorrect": false},
+                    {"text": "9", "isCorrect": false},
+                    {"text": "12", "isCorrect": false},
+                    {"text": "15", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 127,
+                "section": "Mathematics",
+                "question": "The inverse of a skew-symmetric matrix of odd order",
+                "answerOptions": [
+                    {"text": "does not exist", "isCorrect": true},
+                    {"text": "is a symmetric matrix", "isCorrect": false},
+                    {"text": "is a skew-symmetric matrix", "isCorrect": false},
+                    {"text": "is a diagonal matrix", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 128,
+                "section": "Mathematics",
+                "question": "If A={a,b,c} and B={-2,-1,0,1,2}, number of injections from A to B is",
+                "answerOptions": [
+                    {"text": "243", "isCorrect": false},
+                    {"text": "60", "isCorrect": true},
+                    {"text": "120", "isCorrect": false},
+                    {"text": "125", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 129,
+                "section": "Mathematics",
+                "question": "The moment of a force F about a point r is",
+                "answerOptions": [
+                    {"text": "r x F", "isCorrect": true},
+                    {"text": "r . F", "isCorrect": false},
+                    {"text": "|r|", "isCorrect": false},
+                    {"text": "|r x F|", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 130,
+                "section": "Mathematics",
+                "question": "If f(x) = x^2 - ax + 5 is strictly increasing on (1,2), then a lies in interval",
+                "answerOptions": [
+                    {"text": "(1, 2)", "isCorrect": false},
+                    {"text": "(2, inf)", "isCorrect": false},
+                    {"text": "(4, inf)", "isCorrect": false},
+                    {"text": "(-inf, 2]", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 131,
+                "section": "Physics",
+                "question": "The electric dipole moment of an electron and a proton 4.3 nm apart, is",
+                "answerOptions": [
+                    {"text": "3.72 x 10^-14 C-m", "isCorrect": false},
+                    {"text": "11 x 10^-46 C^2/m", "isCorrect": false},
+                    {"text": "2.56 x 10^-29 C^2/m", "isCorrect": false},
+                    {"text": "6.8 x 10^-28 C-m", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 132,
+                "section": "Physics",
+                "question": "A gas has volume V and pressure p. Total translational KE of all molecules is",
+                "answerOptions": [
+                    {"text": "(3/2) PV only if gas is monoatomic", "isCorrect": false},
+                    {"text": "(3/2) PV only if gas is diatomic", "isCorrect": false},
+                    {"text": "(3/2) pV in all cases", "isCorrect": true},
+                    {"text": "None of the above", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 133,
+                "section": "Physics",
+                "question": "Object placed at 10 cm from lens, real image formed with magnification 0.5. Lens is",
+                "answerOptions": [
+                    {"text": "convex with focal length 10 cm", "isCorrect": false},
+                    {"text": "convex with focal length 10/3 cm", "isCorrect": true},
+                    {"text": "concave with focal length 10/3 cm", "isCorrect": false},
+                    {"text": "concave with focal length 10 cm", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 134,
+                "section": "Physics",
+                "question": "Ball of mass m moving towards player with velocity v. Player stops it. Impulse applied is",
+                "answerOptions": [
+                    {"text": "+mv", "isCorrect": true},
+                    {"text": "+2mv", "isCorrect": false},
+                    {"text": "-2mv", "isCorrect": false},
+                    {"text": "mv/2", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 135,
+                "section": "Physics",
+                "question": "Body weight 72 N. At height h = R (radius of earth), weight would be",
+                "answerOptions": [
+                    {"text": "zero", "isCorrect": false},
+                    {"text": "18 N", "isCorrect": true},
+                    {"text": "36 N", "isCorrect": false},
+                    {"text": "72 N", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 136,
+                "section": "Physics",
+                "question": "In an elastic collision,",
+                "answerOptions": [
+                    {"text": "only momentum is conserved", "isCorrect": false},
+                    {"text": "both momentum and KE are conserved", "isCorrect": true},
+                    {"text": "only KE is conserved", "isCorrect": false},
+                    {"text": "Neither KE nor momentum is conserved", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 137,
+                "section": "Physics",
+                "question": "Two solid conductors same material, length, resistance. One circular area A1, other square area A2. Ratio A1/A2 is",
+                "answerOptions": [
+                    {"text": "2", "isCorrect": false},
+                    {"text": "1", "isCorrect": true},
+                    {"text": "0.8", "isCorrect": false},
+                    {"text": "1.5", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 138,
+                "section": "Physics",
+                "question": "Particle moving with constant angular velocity along circle. Which is true?",
+                "answerOptions": [
+                    {"text": "The projection of the particle on any one of the diameters executes SHM", "isCorrect": true},
+                    {"text": "None of the above", "isCorrect": false},
+                    {"text": "The projection of the particle on any of the diameters executes SHM", "isCorrect": true},
+                    {"text": "The particle executes SHM", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 139,
+                "section": "Physics",
+                "question": "Current varying at 3 A/s in coil generates 8 mV in nearby coil. Mutual inductance is",
+                "answerOptions": [
+                    {"text": "0.266 H", "isCorrect": false},
+                    {"text": "2.66 mH", "isCorrect": true},
+                    {"text": "2.66 x 10^-3 mH", "isCorrect": false},
+                    {"text": "2.66 H", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 140,
+                "section": "Physics",
+                "question": "Intrinsic semiconductor is electrically neutral. Extrinsic semiconductor is",
+                "answerOptions": [
+                    {"text": "negatively charged", "isCorrect": false},
+                    {"text": "positively or negatively charged", "isCorrect": false},
+                    {"text": "positively charged", "isCorrect": false},
+                    {"text": "electrically neutral", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 141,
+                "section": "Physics",
+                "question": "Particle mass 2 kg, circular path radius 1 m, angular speed 2 rad/s. Centripetal force is",
+                "answerOptions": [
+                    {"text": "8 N", "isCorrect": true},
+                    {"text": "4pi^4 N", "isCorrect": false},
+                    {"text": "8pi N", "isCorrect": false},
+                    {"text": "4pi N", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 142,
+                "section": "Physics",
+                "question": "Select the correct statement.",
+                "answerOptions": [
+                    {"text": "In a full wave rectifier, two diodes work simultaneously.", "isCorrect": false},
+                    {"text": "In a full wave rectifier, two diodes work alternately.", "isCorrect": true},
+                    {"text": "Efficiency of full/half wave is same.", "isCorrect": false},
+                    {"text": "Full wave rectifier is bi-directional.", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 143,
+                "section": "Physics",
+                "question": "Identify the wrong statement regarding electrical potential energy.",
+                "answerOptions": [
+                    {"text": "PE of two electrons increases if separation decreases.", "isCorrect": false},
+                    {"text": "PE of proton-electron increases if separation decreases.", "isCorrect": true},
+                    {"text": "PE of two protons increases if separation decreases.", "isCorrect": false},
+                    {"text": "PE of proton-electron increases if separation increases.", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 144,
+                "section": "Physics",
+                "question": "Particle mass 0.10 kg executes SHM, amplitude 0.05 m, frequency 20 vib/s. Energy is",
+                "answerOptions": [
+                    {"text": "1J", "isCorrect": false},
+                    {"text": "2pi^2 J", "isCorrect": true},
+                    {"text": "zero", "isCorrect": false},
+                    {"text": "2J", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 145,
+                "section": "Physics",
+                "question": "If Re is Reynold's number, which is incorrect?",
+                "answerOptions": [
+                    {"text": "For Re < 1000, flow is laminar", "isCorrect": false},
+                    {"text": "All are incorrect", "isCorrect": false},
+                    {"text": "For Re > 2000, flow is turbulent", "isCorrect": false},
+                    {"text": "For 1000 < Re < 2000, flow is steady", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 146,
+                "section": "Physics",
+                "question": "Work function for Al, K, Pt is 4.28 eV, 2.30 eV, 5.65 eV. Threshold frequencies order:",
+                "answerOptions": [
+                    {"text": "K > Al > Pt", "isCorrect": false},
+                    {"text": "Pt > Al > K", "isCorrect": true},
+                    {"text": "Al > Pt > K", "isCorrect": false},
+                    {"text": "Al > K > Pt", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 147,
+                "section": "Physics",
+                "question": "Ratio of terminal velocities of two drops of radii R and R/2 is",
+                "answerOptions": [
+                    {"text": "2", "isCorrect": false},
+                    {"text": "1/2", "isCorrect": false},
+                    {"text": "4", "isCorrect": true},
+                    {"text": "1", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 148,
+                "section": "Physics",
+                "question": "To increase sensitivity of moving coil galvanometer, one should decrease",
+                "answerOptions": [
+                    {"text": "number of turns", "isCorrect": false},
+                    {"text": "area of coil", "isCorrect": false},
+                    {"text": "torsional constant of suspension", "isCorrect": true},
+                    {"text": "strength of magnet", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 149,
+                "section": "Physics",
+                "question": "Torque of force F = -3i + j + 5k acting on point r = 7i + 3j + k about origin is",
+                "answerOptions": [
+                    {"text": "14i - 38j + 16k", "isCorrect": true},
+                    {"text": "4i + 4j + 6k", "isCorrect": false},
+                    {"text": "-14i + 38j - 16k", "isCorrect": false},
+                    {"text": "-21i + 3j + 5k", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 150,
+                "section": "Physics",
+                "question": "If torque is zero, then",
+                "answerOptions": [
+                    {"text": "energy is conserved", "isCorrect": false},
+                    {"text": "linear momentum is conserved", "isCorrect": false},
+                    {"text": "angular momentum is conserved", "isCorrect": true},
+                    {"text": "angular momentum is not conserved", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 151,
+                "section": "Physics",
+                "question": "Two balls projected at 45 and 60 degrees, max heights same. Ratio of initial velocities?",
+                "answerOptions": [
+                    {"text": "sqrt(2):sqrt(3)", "isCorrect": false},
+                    {"text": "2:3", "isCorrect": false},
+                    {"text": "3:2", "isCorrect": false},
+                    {"text": "sqrt(3):sqrt(2)", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 152,
+                "section": "Physics",
+                "question": "Two wires same material/length, diameter ratio 1:2, stretched by same force. PE per unit volume ratio?",
+                "answerOptions": [
+                    {"text": "2:1", "isCorrect": false},
+                    {"text": "1:1", "isCorrect": false},
+                    {"text": "16:1", "isCorrect": true},
+                    {"text": "4:1", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 153,
+                "section": "Physics",
+                "question": "Bodies 1 kg at (-1, 2) and 2 kg at (2, 4). COM coordinates?",
+                "answerOptions": [
+                    {"text": "(1, 10/3)", "isCorrect": true},
+                    {"text": "(1, 3)", "isCorrect": false},
+                    {"text": "(1, 0)", "isCorrect": false},
+                    {"text": "(0, 1)", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 154,
+                "section": "Physics",
+                "question": "Potentials of capacitor plates +10V and -10V. Charge 40C. Capacitance is",
+                "answerOptions": [
+                    {"text": "0.5 F", "isCorrect": false},
+                    {"text": "4 F", "isCorrect": false},
+                    {"text": "0.25 F", "isCorrect": false},
+                    {"text": "2 F", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 155,
+                "section": "Physics",
+                "question": "If earth shrinks to half radius (mass same), g will be",
+                "answerOptions": [
+                    {"text": "4g", "isCorrect": true},
+                    {"text": "2g", "isCorrect": false},
+                    {"text": "g/4", "isCorrect": false},
+                    {"text": "g/2", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 156,
+                "section": "Physics",
+                "question": "Current I = 3t^2 + 2t + 5. Charge between t=0 to t=2 is",
+                "answerOptions": [
+                    {"text": "5 C", "isCorrect": false},
+                    {"text": "22 C", "isCorrect": true},
+                    {"text": "20 C", "isCorrect": false},
+                    {"text": "18 C", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 157,
+                "section": "Physics",
+                "question": "Current 2A, emf 1.5V, internal resistance 0.15 ohm. Potential difference across cell?",
+                "answerOptions": [
+                    {"text": "1.50", "isCorrect": false},
+                    {"text": "1.00", "isCorrect": false},
+                    {"text": "1.20", "isCorrect": true},
+                    {"text": "1.35", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 158,
+                "section": "Physics",
+                "question": "Ratio of amplitude of B field to E field for EM wave in vacuum is",
+                "answerOptions": [
+                    {"text": "unity", "isCorrect": false},
+                    {"text": "ratio of permeability to susceptibility", "isCorrect": false},
+                    {"text": "reciprocal of speed of light", "isCorrect": true},
+                    {"text": "speed of light", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 159,
+                "section": "Physics",
+                "question": "Block 2kg, coeff static friction 0.4. Force 2.8N applied. Friction force is",
+                "answerOptions": [
+                    {"text": "8N", "isCorrect": false},
+                    {"text": "2.8 N", "isCorrect": true},
+                    {"text": "2 N", "isCorrect": false},
+                    {"text": "zero", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 160,
+                "section": "Physics",
+                "question": "Hollow sphere dia 60cm, charge 500 microC. Potential at 100cm from centre?",
+                "answerOptions": [
+                    {"text": "5 x 10^6 V", "isCorrect": false},
+                    {"text": "6 x 10^7 V", "isCorrect": false},
+                    {"text": "7 x 10^6 V", "isCorrect": false},
+                    {"text": "4.5 x 10^6 V", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 161,
+                "section": "Physics",
+                "question": "Charge Q inside Gaussian sphere radius R. If radius doubled, flux will",
+                "answerOptions": [
+                    {"text": "remain the same", "isCorrect": true},
+                    {"text": "be doubled", "isCorrect": false},
+                    {"text": "increase four times", "isCorrect": false},
+                    {"text": "be reduced to half", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 162,
+                "section": "Physics",
+                "question": "Rutherford scattering: Energy of projectile is",
+                "answerOptions": [
+                    {"text": "directly proportional to mass M1", "isCorrect": false},
+                    {"text": "directly proportional to Z1 Z2", "isCorrect": true},
+                    {"text": "directly proportional to product of M1 M2", "isCorrect": false},
+                    {"text": "directly proportional to Z1", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 163,
+                "section": "Physics",
+                "question": "Force F = 2i + 3j + 4k acts for 4s, displacement d = 3i + 4j + 5k. Power used is",
+                "answerOptions": [
+                    {"text": "7.5 W", "isCorrect": false},
+                    {"text": "9.5 W", "isCorrect": true},
+                    {"text": "6.5 W", "isCorrect": false},
+                    {"text": "4.5 W", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 164,
+                "section": "Physics",
+                "question": "Body falls from h=200m. Ratio of distance in each 2s during t=0 to t=6s is",
+                "answerOptions": [
+                    {"text": "1:2:3", "isCorrect": false},
+                    {"text": "1:2:4", "isCorrect": false},
+                    {"text": "1:3:5", "isCorrect": true},
+                    {"text": "1:4:9", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 165,
+                "section": "Physics",
+                "question": "Bulbs in series. One fused, removed, rest connected in series. Illumination will",
+                "answerOptions": [
+                    {"text": "decrease", "isCorrect": false},
+                    {"text": "not continuous", "isCorrect": false},
+                    {"text": "remain same", "isCorrect": false},
+                    {"text": "increase", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 166,
+                "section": "Physics",
+                "question": "String length 1m, mass/length 0.1 g/cm. Tension 400N. Fundamental frequency?",
+                "answerOptions": [
+                    {"text": "400 Hz", "isCorrect": false},
+                    {"text": "100 Hz", "isCorrect": true},
+                    {"text": "50 Hz", "isCorrect": false},
+                    {"text": "200 Hz", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 167,
+                "section": "Physics",
+                "question": "Coil 20 turns, radius 10cm, B=0.10T normal to plane. Current 5A. Torque?",
+                "answerOptions": [
+                    {"text": "0.314 Nm", "isCorrect": false},
+                    {"text": "3.14 Nm", "isCorrect": false},
+                    {"text": "zero", "isCorrect": true},
+                    {"text": "31.4 Nm", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 168,
+                "section": "Physics",
+                "question": "Young's exp: Green light (5461 A) gives 60 fringes. Sodium light (5890 A) gives how many?",
+                "answerOptions": [
+                    {"text": "40", "isCorrect": false},
+                    {"text": "55", "isCorrect": true},
+                    {"text": "50", "isCorrect": false},
+                    {"text": "60", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 169,
+                "section": "Physics",
+                "question": "Ions masses 1:1, charges 1:2, speeds 2:3. Ratio of radii in cyclotron?",
+                "answerOptions": [
+                    {"text": "3:1", "isCorrect": false},
+                    {"text": "1:4", "isCorrect": false},
+                    {"text": "4:3", "isCorrect": true},
+                    {"text": "2:3", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 170,
+                "section": "Physics",
+                "question": "Body falling breaks into unequal masses. COM shifts horizontally towards",
+                "answerOptions": [
+                    {"text": "heavier piece", "isCorrect": false},
+                    {"text": "lighter piece", "isCorrect": false},
+                    {"text": "does not shift horizontally", "isCorrect": true},
+                    {"text": "depends on velocity", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 171,
+                "section": "Physics",
+                "question": "Escape velocity for 1kg is 11.2 km/s. For 100kg it is",
+                "answerOptions": [
+                    {"text": "11.2 km/s", "isCorrect": true},
+                    {"text": "112 km/s", "isCorrect": false},
+                    {"text": "11.2 x 10^-2 km/s", "isCorrect": false},
+                    {"text": "11.2 x 10^2 km/s", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 172,
+                "section": "Physics",
+                "question": "Mass defect 0.3g. Energy in kWh?",
+                "answerOptions": [
+                    {"text": "1.5 x 10^6", "isCorrect": false},
+                    {"text": "7.5 x 10^6", "isCorrect": true},
+                    {"text": "2.5 x 10^6", "isCorrect": false},
+                    {"text": "3 x 10^6", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 173,
+                "section": "Physics",
+                "question": "Region volume 0.2 m^3, potential 5V constant. E field is",
+                "answerOptions": [
+                    {"text": "5 N/C", "isCorrect": false},
+                    {"text": "0.5 N/C", "isCorrect": false},
+                    {"text": "1 N/C", "isCorrect": false},
+                    {"text": "zero", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 174,
+                "section": "Physics",
+                "question": "Transition with minimum wavelength?",
+                "answerOptions": [
+                    {"text": "n=5 to n=4", "isCorrect": false},
+                    {"text": "n=3 to n=2", "isCorrect": false},
+                    {"text": "n=2 to n=1", "isCorrect": true},
+                    {"text": "n=4 to n=3", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 175,
+                "section": "Physics",
+                "question": "Two pure inductors L in parallel, well separated. Total inductance?",
+                "answerOptions": [
+                    {"text": "L/2", "isCorrect": true},
+                    {"text": "L/4", "isCorrect": false},
+                    {"text": "L", "isCorrect": false},
+                    {"text": "2L", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 176,
+                "section": "Physics",
+                "question": "Step-down transformer 24V output, 12W bulb. Peak current?",
+                "answerOptions": [
+                    {"text": "1/sqrt(2) A", "isCorrect": true},
+                    {"text": "sqrt(2) A", "isCorrect": false},
+                    {"text": "2 A", "isCorrect": false},
+                    {"text": "2sqrt(2) A", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 177,
+                "section": "Physics",
+                "question": "Solid sphere rotating freely. Radius increases (mass same). Conserved quantity?",
+                "answerOptions": [
+                    {"text": "Angular momentum", "isCorrect": true},
+                    {"text": "Rotational KE", "isCorrect": false},
+                    {"text": "Moment of inertia", "isCorrect": false},
+                    {"text": "Angular velocity", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 178,
+                "section": "Physics",
+                "question": "Which is not equal to watt?",
+                "answerOptions": [
+                    {"text": "ampere x volt", "isCorrect": false},
+                    {"text": "(ampere)^2 x ohm", "isCorrect": false},
+                    {"text": "ampere/volt", "isCorrect": true},
+                    {"text": "joule/second", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 179,
+                "section": "Physics",
+                "question": "Carnot engine source 127C, sink 87C. Efficiency?",
+                "answerOptions": [
+                    {"text": "50%", "isCorrect": false},
+                    {"text": "40%", "isCorrect": false},
+                    {"text": "10%", "isCorrect": true},
+                    {"text": "25%", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 180,
+                "section": "Physics",
+                "question": "SHM amplitude 0.1m, mean velocity 3 m/s. Frequency?",
+                "answerOptions": [
+                    {"text": "15/pi", "isCorrect": true},
+                    {"text": "15 pi", "isCorrect": false},
+                    {"text": "30 pi", "isCorrect": false},
+                    {"text": "25 pi", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 181,
+                "section": "Chemistry",
+                "question": "Among K+, Cl-, S2-, Ca2+. Largest size?",
+                "answerOptions": [
+                    {"text": "S2-", "isCorrect": true},
+                    {"text": "Ca2+", "isCorrect": false},
+                    {"text": "Cl-", "isCorrect": false},
+                    {"text": "K+", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 182,
+                "section": "Chemistry",
+                "question": "In Appolo spacecraft fuel cell used was",
+                "answerOptions": [
+                    {"text": "H2-O2 fuel cell", "isCorrect": true},
+                    {"text": "CH4-O2 fuel cell", "isCorrect": false},
+                    {"text": "Both", "isCorrect": false},
+                    {"text": "None", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 183,
+                "section": "Chemistry",
+                "question": "Nitrogenous bases found in RNA",
+                "answerOptions": [
+                    {"text": "Cytosine, Adenine, Guanine, Uracil", "isCorrect": true},
+                    {"text": "Cytosine, Adenine, Uracil, Guanine", "isCorrect": false},
+                    {"text": "Cytosine, Adenine, Thymine, Guanine", "isCorrect": false},
+                    {"text": "Cytosine, Adenine, Thymine, Uracil", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 184,
+                "section": "Chemistry",
+                "question": "Formaldehyde reacts with which to give urotropine",
+                "answerOptions": [
+                    {"text": "Ammonia", "isCorrect": true},
+                    {"text": "Ammonium hydroxide", "isCorrect": false},
+                    {"text": "Methylamine", "isCorrect": false},
+                    {"text": "Ammonium chloride", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 185,
+                "section": "Chemistry",
+                "question": "Number of co-ordinated water in CuSO4.5H2O",
+                "answerOptions": [
+                    {"text": "4", "isCorrect": true},
+                    {"text": "3", "isCorrect": false},
+                    {"text": "2", "isCorrect": false},
+                    {"text": "1", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 186,
+                "section": "Chemistry",
+                "question": "O2- is",
+                "answerOptions": [
+                    {"text": "Paramagnetic, bond order 1.5", "isCorrect": true},
+                    {"text": "Diamagnetic, bond order 1", "isCorrect": false},
+                    {"text": "Paramagnetic, bond order 2", "isCorrect": false},
+                    {"text": "Paramagnetic, bond order 2.5", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 187,
+                "section": "Chemistry",
+                "question": "Electricity needed to reduce 1mol of Cr2O7^2-",
+                "answerOptions": [
+                    {"text": "12F", "isCorrect": false},
+                    {"text": "4F", "isCorrect": false},
+                    {"text": "6F", "isCorrect": true},
+                    {"text": "2F", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 188,
+                "section": "Chemistry",
+                "question": "pKa of acid 4.28, pKb of base 4.27. pH of salt?",
+                "answerOptions": [
+                    {"text": "6.995", "isCorrect": false},
+                    {"text": "7.005", "isCorrect": true},
+                    {"text": "11.775", "isCorrect": false},
+                    {"text": "7.050", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 189,
+                "section": "Chemistry",
+                "question": "Conjugate base of NH3 is",
+                "answerOptions": [
+                    {"text": "NH2-", "isCorrect": true},
+                    {"text": "NH4+", "isCorrect": false},
+                    {"text": "NH2-", "isCorrect": false},
+                    {"text": "N2H4", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 190,
+                "section": "Chemistry",
+                "question": "2NOCl -> 2NO + Cl2, Kp=1.8x10^-2 at 500K. Kc?",
+                "answerOptions": [
+                    {"text": "4.3 x 10^-4", "isCorrect": true},
+                    {"text": "8.3 x 10^-4", "isCorrect": false},
+                    {"text": "0.43 x 10^-4", "isCorrect": false},
+                    {"text": "2.15 x 10^-4", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 191,
+                "section": "Chemistry",
+                "question": "32g of methanol contains as many molecules as",
+                "answerOptions": [
+                    {"text": "32g of ammonia", "isCorrect": false},
+                    {"text": "32g of water", "isCorrect": false},
+                    {"text": "32g of sulphuric acid", "isCorrect": false},
+                    {"text": "32g of oxygen gas", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 192,
+                "section": "Chemistry",
+                "question": "IUPAC name of [Co(NH3)5Cl]Cl2",
+                "answerOptions": [
+                    {"text": "Pentaamminechloridocobalt(III) chloride", "isCorrect": true},
+                    {"text": "Chloridopentaamminecobalt(III) chloride", "isCorrect": false},
+                    {"text": "Pentaamminechloridocobalt(III) dichloride", "isCorrect": false},
+                    {"text": "Pentaamminechloridocobalt (III) chloride", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 193,
+                "section": "Chemistry",
+                "question": "Increasing boiling point order",
+                "answerOptions": [
+                    {"text": "Methoxymethane < propanal < propan-1-ol", "isCorrect": true},
+                    {"text": "Propanal < methoxymethane < propane-1-ol", "isCorrect": false},
+                    {"text": "Methoxymethane < propane-1-ol < propanal", "isCorrect": false},
+                    {"text": "Propanal < propan-1-ol < methoxymethane", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 194,
+                "section": "Chemistry",
+                "question": "Spin only moment of M2+ ion (Z=28)",
+                "answerOptions": [
+                    {"text": "2.87 B.M.", "isCorrect": true},
+                    {"text": "5.37 B.M.", "isCorrect": false},
+                    {"text": "3.87 B.M.", "isCorrect": false},
+                    {"text": "4.90 B.M.", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 195,
+                "section": "Chemistry",
+                "question": "On hydrogenation ethene gives",
+                "answerOptions": [
+                    {"text": "Ethyne", "isCorrect": false},
+                    {"text": "Butane", "isCorrect": false},
+                    {"text": "Methane", "isCorrect": false},
+                    {"text": "Ethane", "isCorrect": true}
+                ]
+                },
+                {
+                "questionNumber": 196,
+                "section": "Chemistry",
+                "question": "Wavelength of light wave having period 2.0x10^-10 s",
+                "answerOptions": [
+                    {"text": "6.0 x 10^-2 m", "isCorrect": true},
+                    {"text": "6.0 x 10^-4 m", "isCorrect": false},
+                    {"text": "6.0 x 10^-1 m", "isCorrect": false},
+                    {"text": "6.0 x 10^-5 m", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 197,
+                "section": "Chemistry",
+                "question": "Van't Hoff factor(i) for dissociation of AlCl3",
+                "answerOptions": [
+                    {"text": "2", "isCorrect": false},
+                    {"text": "4", "isCorrect": true},
+                    {"text": "8", "isCorrect": false},
+                    {"text": "3", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 198,
+                "section": "Chemistry",
+                "question": "Haloalkanes reacts with AgCN to form",
+                "answerOptions": [
+                    {"text": "Alkyl isocyanide", "isCorrect": true},
+                    {"text": "Alkyl aryl isocyanide", "isCorrect": false},
+                    {"text": "Alkyl aryl cyanide", "isCorrect": false},
+                    {"text": "Alkyl cyanide", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 199,
+                "section": "Chemistry",
+                "question": "Chloroform decomposition gives poisonous gas",
+                "answerOptions": [
+                    {"text": "CO", "isCorrect": false},
+                    {"text": "COCl3", "isCorrect": false},
+                    {"text": "COCl2", "isCorrect": true},
+                    {"text": "CH3NC", "isCorrect": false}
+                ]
+                },
+                {
+                "questionNumber": 200,
+                "section": "Chemistry",
+                "question": "Glucose oxidised to Gluconic acid by Tollen's reagent. Identified by",
+                "answerOptions": [
+                    {"text": "Evolution of gas", "isCorrect": false},
+                    {"text": "Yellow precipitate", "isCorrect": false},
+                    {"text": "Red precipitate", "isCorrect": false},
+                    {"text": "Formation of silver mirror", "isCorrect": true}
+                ]
                 }
-            }, 1000);
-        }
+            ], []);
 
-        /**
-         * Renders all questions to the DOM
-         */
-        function loadQuestions() {
-            let questionsHTML = '';
-            allQuestions.forEach(q => {
-                questionsHTML += `
-                    <div id="q-card-${q.id}" class="bg-white p-5 rounded-lg shadow question-card" data-subject="${q.subject}">
-                        <p class="text-lg font-semibold text-gray-800 mb-4">
-                            <span class="font-bold text-indigo-600">Q ${q.id} (${q.subject}):</span>
-                            ${q.text}
-                        </p>
-                        <div class="space-y-3">
-                            ${q.options.map((opt, index) => `
-                                <label id="q-${q.id}-opt-${index}" class="flex items-center space-x-3 text-gray-700 p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                                    <input type="radio" name="question-${q.id}" value="${index}">
-                                    <span>${opt}</span>
-                                </label>
-                            `).join('')}
+            const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+            const [answers, setAnswers] = useState({}); // { questionIndex: optionIndex }
+            const [reviewStatus, setReviewStatus] = useState({}); // { questionIndex: boolean }
+            const [timeLeft, setTimeLeft] = useState(3 * 60 * 60); // 3 hours in seconds
+            const [showResult, setShowResult] = useState(false);
+            const [showPalette, setShowPalette] = useState(false); // Mobile toggle
+
+            // Timer Effect
+            useEffect(() => {
+                if (showResult) return;
+                const timer = setInterval(() => {
+                setTimeLeft((prev) => {
+                    if (prev <= 1) {
+                    clearInterval(timer);
+                    handleSubmit();
+                    return 0;
+                    }
+                    return prev - 1;
+                });
+                }, 1000);
+                return () => clearInterval(timer);
+            }, [showResult]);
+
+            const formatTime = (seconds) => {
+                const h = Math.floor(seconds / 3600);
+                const m = Math.floor((seconds % 3600) / 60);
+                const s = seconds % 60;
+                return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            };
+
+            const handleOptionSelect = (optionIndex) => {
+                setAnswers({ ...answers, [currentQuestionIndex]: optionIndex });
+            };
+
+            const handleClearResponse = () => {
+                const newAnswers = { ...answers };
+                delete newAnswers[currentQuestionIndex];
+                setAnswers(newAnswers);
+            };
+
+            const handleMarkReview = () => {
+                setReviewStatus({
+                ...reviewStatus,
+                [currentQuestionIndex]: !reviewStatus[currentQuestionIndex]
+                });
+            };
+
+            const handleNext = () => {
+                if (currentQuestionIndex < questions.length - 1) {
+                setCurrentQuestionIndex(currentQuestionIndex + 1);
+                }
+            };
+
+            const handlePrev = () => {
+                if (currentQuestionIndex > 0) {
+                setCurrentQuestionIndex(currentQuestionIndex - 1);
+                }
+            };
+
+            const handleSubmit = () => {
+                setShowResult(true);
+            };
+
+            const calculateScore = () => {
+                let score = 0;
+                let correct = 0;
+                let incorrect = 0;
+                questions.forEach((q, index) => {
+                const userAnswer = answers[index];
+                if (userAnswer !== undefined) {
+                    if (q.answerOptions[userAnswer].isCorrect) {
+                    score++;
+                    correct++;
+                    } else {
+                    incorrect++;
+                    }
+                }
+                });
+                return { score, correct, incorrect, attempted: Object.keys(answers).length };
+            };
+
+            const getQuestionStatusColor = (index) => {
+                if (index === currentQuestionIndex) return 'border-2 border-blue-600';
+                if (reviewStatus[index]) return 'bg-purple-500 text-white hover:bg-purple-600';
+                if (answers[index] !== undefined) return 'bg-green-500 text-white hover:bg-green-600';
+                return 'bg-gray-200 text-gray-700 hover:bg-gray-300'; // Not Answered / Not Visited distinction could be added if tracking visits
+            };
+
+            if (showResult) {
+                const result = calculateScore();
+                return (
+                <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center font-sans">
+                    <div className="bg-white rounded-lg shadow-xl p-8 max-w-2xl w-full">
+                    <div className="text-center mb-8">
+                        <h2 className="text-3xl font-bold text-gray-800 mb-2">Test Result Summary</h2>
+                        <p className="text-gray-500">IMU CET 2025 Mock Test</p>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-6 mb-8">
+                        <div className="bg-blue-50 p-6 rounded-lg text-center">
+                        <p className="text-sm text-blue-600 font-semibold uppercase">Total Score</p>
+                        <p className="text-4xl font-bold text-blue-800">{result.score} <span className="text-xl text-gray-500">/ 200</span></p>
+                        </div>
+                        <div className="bg-gray-50 p-6 rounded-lg text-center">
+                        <p className="text-sm text-gray-600 font-semibold uppercase">Attempted</p>
+                        <p className="text-4xl font-bold text-gray-800">{result.attempted}</p>
+                        </div>
+                        <div className="bg-green-50 p-6 rounded-lg text-center">
+                        <p className="text-sm text-green-600 font-semibold uppercase">Correct</p>
+                        <p className="text-4xl font-bold text-green-800">{result.correct}</p>
+                        </div>
+                        <div className="bg-red-50 p-6 rounded-lg text-center">
+                        <p className="text-sm text-red-600 font-semibold uppercase">Incorrect</p>
+                        <p className="text-4xl font-bold text-red-800">{result.incorrect}</p>
                         </div>
                     </div>
-                `;
-            });
-            questionsContainer.innerHTML = questionsHTML;
-        }
 
-        /**
-         * Filters questions by subject
-         */
-        window.filterQuestions = function(subject) {
-            const allCards = document.querySelectorAll('.question-card');
-            const filterButtons = document.querySelectorAll('.filter-btn');
-            
-            // Update button styles
-            filterButtons.forEach(btn => {
-                btn.classList.remove('bg-indigo-600', 'text-white');
-                btn.classList.add('bg-white', 'text-gray-700');
-                if (btn.textContent.toLowerCase().includes(subject.toLowerCase())) {
-                    btn.classList.add('bg-indigo-600', 'text-white');
-                    btn.classList.remove('bg-white', 'text-gray-700');
-                }
-            });
+                    <button 
+                        onClick={() => window.location.reload()}
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2"
+                    >
+                        <RotateCcw size={20} /> Restart Test
+                    </button>
+                    </div>
+                </div>
+                );
+            }
 
-            // Filter cards
-            allCards.forEach(card => {
-                if (subject === 'all' || card.dataset.subject === subject) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        }
+            const currentQuestion = questions[currentQuestionIndex];
 
-        /**
-         * Opens the confirmation modal
-         */
-        window.submitTest = function() {
-            if (testSubmitted) return;
-            confirmModal.classList.remove('hidden');
-        }
+            return (
+                <div className="flex flex-col h-screen font-sans bg-gray-100 overflow-hidden">
+                {/* Header */}
+                <header className="bg-blue-700 text-white p-4 shadow-md flex justify-between items-center z-10 shrink-0">
+                    <div>
+                    <h1 className="text-xl font-bold tracking-wide">IMU CET 2025</h1>
+                    <p className="text-xs text-blue-200">Mock Test Simulator</p>
+                    </div>
+                    <div className="flex items-center gap-6">
+                    <div className="hidden md:block text-right">
+                        <p className="text-sm font-medium">Candidate: <span className="font-bold">Mock User</span></p>
+                    </div>
+                    <div className="flex items-center bg-blue-800 px-4 py-2 rounded-lg border border-blue-600">
+                        <Clock size={20} className="mr-2 text-yellow-400" />
+                        <span className="text-xl font-mono font-bold tracking-widest">{formatTime(timeLeft)}</span>
+                    </div>
+                    <button 
+                        className="md:hidden p-2 hover:bg-blue-600 rounded"
+                        onClick={() => setShowPalette(!showPalette)}
+                    >
+                        {showPalette ? <X size={24} /> : <Menu size={24} />}
+                    </button>
+                    </div>
+                </header>
 
-        /**
-         * Closes the confirmation modal
-         */
-        window.closeConfirmModal = function() {
-            confirmModal.classList.add('hidden');
-        }
+                {/* Main Content Area */}
+                <div className="flex flex-1 overflow-hidden relative">
+                    
+                    {/* Question Area */}
+                    <main className="flex-1 flex flex-col h-full overflow-hidden bg-white">
+                    {/* Question Header */}
+                    <div className="bg-gray-50 border-b p-4 flex justify-between items-center">
+                        <h2 className="text-lg font-semibold text-gray-700">
+                        Question {currentQuestionIndex + 1}
+                        </h2>
+                        <span className="bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-medium">
+                        {currentQuestion.section}
+                        </span>
+                    </div>
 
-        /**
-         * Submits the test
-         */
-        window.performSubmit = function() {
-            if (testSubmitted) return;
-            testSubmitted = true;
-            confirmModal.classList.add('hidden');
+                    {/* Question Content */}
+                    <div className="flex-1 overflow-y-auto p-6 md:p-8">
+                        <div className="max-w-4xl mx-auto">
+                        <p className="text-lg text-gray-800 mb-8 leading-relaxed whitespace-pre-wrap font-medium">
+                            {currentQuestion.question}
+                        </p>
 
-            clearInterval(timerInterval);
-            timerDisplay.classList.add('text-green-600');
-            timerDisplay.classList.remove('text-red-600');
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Test Submitted';
-            submitBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
-            submitBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+                        <div className="space-y-4">
+                            {currentQuestion.answerOptions.map((option, index) => (
+                            <label 
+                                key={index}
+                                className={`
+                                flex items-start p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 group
+                                ${answers[currentQuestionIndex] === index 
+                                    ? 'border-blue-500 bg-blue-50 shadow-sm' 
+                                    : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'}
+                                `}
+                            >
+                                <input
+                                type="radio"
+                                name={`question-${currentQuestionIndex}`}
+                                className="mt-1 w-5 h-5 text-blue-600 border-gray-300 focus:ring-blue-500 cursor-pointer"
+                                checked={answers[currentQuestionIndex] === index}
+                                onChange={() => handleOptionSelect(index)}
+                                />
+                                <span className={`ml-4 text-base ${answers[currentQuestionIndex] === index ? 'text-gray-900 font-medium' : 'text-gray-600'}`}>
+                                {option.text}
+                                </span>
+                            </label>
+                            ))}
+                        </div>
+                        </div>
+                    </div>
 
-            // Disable all inputs
-            const allInputs = document.querySelectorAll('input[type="radio"]');
-            allInputs.forEach(input => input.disabled = true);
+                    {/* Footer Controls */}
+                    <div className="border-t bg-gray-50 p-4 shrink-0">
+                        <div className="max-w-7xl mx-auto flex flex-wrap gap-3 justify-between items-center">
+                        <div className="flex gap-2 w-full md:w-auto justify-center md:justify-start">
+                            <button 
+                            onClick={handleMarkReview}
+                            className={`
+                                flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-colors
+                                ${reviewStatus[currentQuestionIndex] 
+                                ? 'bg-purple-100 text-purple-700 border border-purple-200 hover:bg-purple-200' 
+                                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'}
+                            `}
+                            >
+                            <Bookmark size={16} />
+                            {reviewStatus[currentQuestionIndex] ? 'Unmark Review' : 'Mark for Review'}
+                            </button>
+                            <button 
+                            onClick={handleClearResponse}
+                            className="px-4 py-2 rounded-lg font-medium text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-200 transition-colors"
+                            >
+                            Clear
+                            </button>
+                        </div>
 
-            // Count attempted questions & Score
-            let score = 0;
-            let correctCount = 0;
-            let incorrectCount = 0;
-            let skippedCount = 0;
-            
-            allQuestions.forEach(q => {
-                const selectedCard = document.getElementById(`q-card-${q.id}`);
-                const selectedOption = document.querySelector(`input[name="question-${q.id}"]:checked`);
-                
-                if (selectedOption) {
-                    const userAnswer = parseInt(selectedOption.value);
-                    if (userAnswer === q.correctAnswer) {
-                        score += 1;
-                        correctCount++;
-                        selectedCard.classList.add('correct-q');
-                    } else {
-                        score -= 0.25;
-                        incorrectCount++;
-                        selectedCard.classList.add('incorrect-q');
-                        // Highlight the correct answer
-                        const correctLabel = document.getElementById(`q-${q.id}-opt-${q.correctAnswer}`);
-                        if(correctLabel) {
-                            correctLabel.classList.add('correct-answer-label');
-                        }
-                    }
-                } else {
-                    // User skipped this question
-                    skippedCount++;
-                    selectedCard.classList.add('incorrect-q'); // Mark skipped as incorrect to show the answer
-                    // Highlight the correct answer
-                    const correctLabel = document.getElementById(`q-${q.id}-opt-${q.correctAnswer}`);
-                    if(correctLabel) {
-                        correctLabel.classList.add('correct-answer-label');
-                    }
-                }
-            });
+                        <div className="flex gap-3 w-full md:w-auto justify-between md:justify-end">
+                            <button 
+                            onClick={handlePrev}
+                            disabled={currentQuestionIndex === 0}
+                            className="flex items-center gap-1 px-6 py-2 rounded-lg font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                            >
+                            <ChevronLeft size={18} /> Previous
+                            </button>
+                            
+                            {currentQuestionIndex === questions.length - 1 ? (
+                            <button 
+                                onClick={handleSubmit}
+                                className="flex items-center gap-2 px-8 py-2 rounded-lg font-bold text-white bg-green-600 hover:bg-green-700 shadow-sm transition-all"
+                            >
+                                Submit Test <CheckCircle size={18} />
+                            </button>
+                            ) : (
+                            <button 
+                                onClick={handleNext}
+                                className="flex items-center gap-1 px-8 py-2 rounded-lg font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-sm transition-all"
+                            >
+                                Save & Next <ChevronRight size={18} />
+                            </button>
+                            )}
+                        </div>
+                        </div>
+                    </div>
+                    </main>
 
-            // Show results modal
-            scoreCountEl.textContent = score.toFixed(2);
-            document.getElementById('correct-count').textContent = correctCount;
-            document.getElementById('incorrect-count').textContent = incorrectCount;
-            document.getElementById('skipped-count').textContent = skippedCount;
+                    {/* Right Sidebar - Question Palette */}
+                    <aside 
+                    className={`
+                        absolute md:relative top-0 right-0 h-full w-80 bg-white border-l shadow-lg md:shadow-none transform transition-transform duration-300 z-20 flex flex-col
+                        ${showPalette ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}
+                    `}
+                    >
+                    {/* Palette Header */}
+                    <div className="p-4 border-b bg-gray-50">
+                        <div className="flex justify-between items-center mb-4 md:hidden">
+                        <h3 className="font-bold text-gray-700">Question Palette</h3>
+                        <button onClick={() => setShowPalette(false)} className="text-gray-500"><X size={20}/></button>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-2 text-xs font-medium text-gray-600">
+                        <div className="flex items-center gap-2">
+                            <span className="w-3 h-3 rounded-full bg-green-500"></span> Answered
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span className="w-3 h-3 rounded-full bg-red-500"></span> Not Answered
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span className="w-3 h-3 rounded-full bg-gray-200 border border-gray-300"></span> Not Visited
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span className="w-3 h-3 rounded-full bg-purple-500"></span> Marked Review
+                        </div>
+                        </div>
+                    </div>
 
-            modal.classList.remove('hidden');
+                    {/* Palette Grid */}
+                    <div className="flex-1 overflow-y-auto p-4">
+                        <div className="grid grid-cols-5 gap-2">
+                        {questions.map((_, index) => (
+                            <button
+                            key={index}
+                            onClick={() => {
+                                setCurrentQuestionIndex(index);
+                                setShowPalette(false);
+                            }}
+                            className={`
+                                h-10 w-10 rounded-lg text-sm font-bold transition-all shadow-sm flex items-center justify-center
+                                ${getQuestionStatusColor(index)}
+                            `}
+                            >
+                            {index + 1}
+                            </button>
+                        ))}
+                        </div>
+                    </div>
 
-            // Scroll to top to see modal
-            window.scrollTo(0, 0);
-        }
+                    {/* Submit Button (Mobile/Sidebar) */}
+                    <div className="p-4 border-t bg-gray-50">
+                        <button 
+                        onClick={handleSubmit}
+                        className="w-full py-3 bg-blue-100 text-blue-700 font-bold rounded-lg hover:bg-blue-200 transition-colors flex items-center justify-center gap-2"
+                        >
+                        <AlertCircle size={18} /> Submit Test
+                        </button>
+                    </div>
+                    </aside>
+                </div>
+                </div>
+            );
+        };
 
-        /**
-         * Closes the results modal
-         */
-        window.closeModal = function() {
-            modal.classList.add('hidden');
-        }
-
-        // --- Initialization ---
-        document.addEventListener('DOMContentLoaded', () => {
-            loadQuestions();
-            startTimer();
-        });
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<IMUCETMockTest />);
     </script>
 </body>
 </html>
